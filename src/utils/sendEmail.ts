@@ -9,7 +9,7 @@ export const sendEmail = async (to: string, subject: string, message: string) =>
     try {
         const msg = {
             to,
-            from: process.env.SENDGRID_VERIFIED_SENDER!, // لازم يكون نفس اللي مفعل في SendGrid
+            from: process.env.SENDGRID_VERIFIED_SENDER!,
             subject,
             text: message,
         };
