@@ -24,11 +24,7 @@ export const sendOtp = async (req: Request, res: Response) => {
 
         //send otp via email
         const message = `Your Movin password reset code is: ${otp}. It expires in 5 minutes.`;
-        //await sendEmail(user.email, "Movin Password Reset Code", message);//
-        sendEmail("malakkhaled178@gmail.com", "Test Email", "Hello from Railway + SendGrid!")
-        .then(() => console.log("Test email sent"))
-        .catch(err => console.error("Test email failed", err));
-
+        await sendEmail(user.email, "Movin Password Reset Code", message);
 
         res.status(200).json({ message: "OTP sent successfully" });
         console.log(`✅ OTP for ${user.email}: ${otp}`);

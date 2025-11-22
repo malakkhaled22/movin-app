@@ -9,11 +9,11 @@ export const sendEmail = async (to: string, subject: string, message: string) =>
     try {
         const msg = {
             to,
-            from: process.env.EMAIL_FROM!, // لازم يكون نفس اللي مفعل في SendGrid
+            from: process.env.SENDGRID_VERIFIED_SENDER!, // لازم يكون نفس اللي مفعل في SendGrid
             subject,
             text: message,
         };
-        
+
         console.log("📨 Sending email via SendGrid...");
         const info = await sgMail.send(msg);
         console.log("✅ Email sent successfully to:", to);
