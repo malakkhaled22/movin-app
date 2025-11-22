@@ -29,7 +29,7 @@ app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
 
-app.set('trust proxy', true); // أو app.set('trust proxy', true);
+app.set('trust proxy', 2); // أو app.set('trust proxy', true);
 // ----------------------------------------------------------------
 
 // تعريف وتطبيق الـ Rate Limiter بعد تفعيل trust proxy
