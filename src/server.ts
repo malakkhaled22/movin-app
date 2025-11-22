@@ -27,6 +27,19 @@ app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
 
+app.set('trust proxy', 1); // أو app.set('trust proxy', true);
+// ----------------------------------------------------------------
+
+// تعريف وتطبيق الـ Rate Limiter بعد تفعيل trust proxy
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 app.get("/", (req, res) => {
     res.send("Backend server is running 🚀");
 });
