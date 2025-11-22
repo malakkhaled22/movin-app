@@ -9,12 +9,12 @@ const router = express.Router();
 
 
 //1- send-otp
-router.post("/forgot-password", otpLimiter, sendOtp);
+router.post("/forgot-password", sendOtp);
 //2- verify-otp
 router.post("/verify-otp", verifyOtp);
 //3- reset-password
 router.post("/reset-password", resetPassword);
 //resend-otp
-router.post("/resend-otp", otpLimiter, resendOtp);
+router.post("/resend-otp", resendOtp);
 
 export default router;
