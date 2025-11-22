@@ -16,14 +16,14 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(session({
-    secret: "someSecretKeyy",
-    resave: false,
-    saveUninitialized: false
-}));
+//app.use(session({
+  //  secret: "someSecretKeyy",
+    //resave: false,
+    //saveUninitialized: false
+//}));
 
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
 //User Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
