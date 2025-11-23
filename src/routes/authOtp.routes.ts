@@ -1,5 +1,4 @@
 import express from "express";
-import { otpLimiter } from "../middlewares/rateLimit";
 import { sendOtp } from "../controllers/authOtp.controller";
 import { verifyOtp } from "../controllers/verifyOtp.controller";
 import { resetPassword } from "../controllers/resetPassword.controller";
