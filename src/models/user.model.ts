@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
@@ -43,7 +42,7 @@ const userSchema = new Schema<IUser>(
         otpExpire: { type: Date, default: null },
         isVerified: { type: Boolean, default: null },
         isGoogleAuth: { type: Boolean, default: false },
-    },
+    },  
     { timestamps: true }
 );
 
