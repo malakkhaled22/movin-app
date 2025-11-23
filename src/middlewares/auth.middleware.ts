@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken"; 
 import { Request, Response, NextFunction } from "express";
 
-interface JwtPayload{
-    id: string;
+export interface JwtPayload{
+    _id: string;
     isAdmin: boolean;
     isSeller: boolean;
     isBuyer: boolean;
@@ -23,7 +23,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     }
     
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-        (req as any).user = decoded;
+        req.user = decoded;
 
         next();
     } catch (error) {
