@@ -69,7 +69,7 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         const token = generateToken({
-            id: String(user._id),
+            _id: String(user._id),
             isAdmin: user.isAdmin,
             isSeller: user.isSeller,
             isBuyer: user.isBuyer,
@@ -79,7 +79,7 @@ export const loginUser = async (req: Request, res: Response) => {
             message: "Login successful",
             token,
             user: {
-                id: user._id,
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 phone: user.phone,

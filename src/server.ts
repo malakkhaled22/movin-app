@@ -8,6 +8,7 @@ import passport from "./config/passport";
 import session from "express-session";
 import GoogleAuthRoutes from "./routes/authGoogle.route";
 import rateLimit from "express-rate-limit";
+import { productRoute } from "./routes/product.routes";
 
 
 dotenv.config();
@@ -28,16 +29,16 @@ app.use(passport.initialize());
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
+app.use("/seller/products", productRoute)
 
-app.set('trust proxy', 2); // أو app.set('trust proxy', true);
+app.set('trust proxy', 2); 
 // ----------------------------------------------------------------
 
-// تعريف وتطبيق الـ Rate Limiter بعد تفعيل trust proxy
 
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });

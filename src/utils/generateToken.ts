@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 interface Payload {
-    id: string;
+    _id: string;
     isSeller?: boolean;
     isBuyer?: boolean;
     isAdmin?: boolean;
