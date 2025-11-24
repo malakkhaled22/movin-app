@@ -27,10 +27,17 @@ export const registerUser = async (req: Request, res: Response) => {
             isBuyer: false,
             canSwitchRole: true
         });
+        
         await newUser.save();
-
+        const token = generateToken({
+            _id: String(newUser._id),
+            isAdmin: newUser.isAdmin,
+            isSeller: newUser.isSeller,
+            isBuyer: newUser.isBuyer,
+        });
         res.status(201).json({
             message: "User registered successfully",
+            token,
             user: {
                 id: newUser._id,
                 name: newUser.name,
