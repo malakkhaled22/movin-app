@@ -7,6 +7,4 @@ const router = express.Router();
 router.post("/register", registerUser);
 //Login user
 router.post("/login", loginUser);
-//Switch user role
-router.patch("/switch-role", switchRole);
 export default router;
