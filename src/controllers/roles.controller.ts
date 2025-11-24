@@ -1,12 +1,11 @@
 import { Request, Response } from "express"; 
 import { User } from "../models/user.model";
-import { accessSync } from "fs";
 
 
 
 export const chooseRole = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).user.id;
+        const userId = (req as any).user._id;
         const { role } = req.body;
 
         if (!role) {
@@ -47,7 +46,7 @@ export const chooseRole = async (req: Request, res: Response) => {
 
 export const switchRole = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).user.id; // from token
+        const userId = (req as any).user._id; // from token
         const { newRole } = req.body;
 
         if (!newRole) {

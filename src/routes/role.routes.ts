@@ -1,6 +1,6 @@
 import express from "express";
-import { switchRole } from "../controllers/switchRole.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
+import { switchRole } from "../controllers/roles.controller";
 import { allowRoles } from "../middlewares/role.guard.middleware";
 import { chooseRole } from "../controllers/roles.controller";
 
