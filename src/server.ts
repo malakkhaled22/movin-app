@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDB } from "./config/db";
 import userRoutes from "./routes/auth.routes";
 import authOtpRoutes from "./routes/authOtp.routes";
+import roleRoutes from "./routes/role.routes";
 import passport from "./config/passport";
 import session from "express-session";
 import GoogleAuthRoutes from "./routes/authGoogle.route";
@@ -29,6 +30,7 @@ app.use(passport.initialize());
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
+app.use("/api/auth", roleRoutes);
 app.use("/seller/products", productRoute)
 
 app.set('trust proxy', 2); 
@@ -37,10 +39,10 @@ app.set('trust proxy', 2);
 
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use(limiter);
 app.get("/", (req, res) => {
