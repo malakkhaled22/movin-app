@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IProduct extends Document {
+export interface IProperty extends Document {
     location: string;
     description: string;
     price: number;
@@ -15,7 +15,7 @@ export interface IProduct extends Document {
     isApproved: boolean;
 }
 
-const productSchema = new Schema<IProduct>(
+const propertySchema = new Schema<IProperty>(
     {
         location: {type: String, required: true},
         description: {type: String, required: true},
@@ -25,7 +25,7 @@ const productSchema = new Schema<IProduct>(
         bedrooms: {type: Number, required: true },
         bathrooms: {type: Number, required: true },
         available_from: {type: Date, required: true},
-        images: [{type: String, required: true }],
+        images: { type: [String], default: [] },
         payment_method: {type: String, required: true},
         seller: {
             type: Schema.Types.ObjectId,
@@ -37,4 +37,4 @@ const productSchema = new Schema<IProduct>(
     {timestamps: true}
 );
 
-export const Product = mongoose.model<IProduct>("Product", productSchema);
+export const Product = mongoose.model<IProperty>("Product", propertySchema);

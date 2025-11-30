@@ -6,10 +6,9 @@ import userRoutes from "./routes/auth.routes";
 import authOtpRoutes from "./routes/authOtp.routes";
 import roleRoutes from "./routes/role.routes";
 import passport from "./config/passport";
-import session from "express-session";
 import GoogleAuthRoutes from "./routes/authGoogle.route";
 import rateLimit from "express-rate-limit";
-import { productRoute } from "./routes/product.routes";
+import propertyRoutes from "./routes/properties.routes";
 
 
 dotenv.config();
@@ -31,7 +30,7 @@ app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
 app.use("/api/auth", roleRoutes);
-app.use("/seller/products", productRoute)
+app.use("/api/seller", propertyRoutes)
 
 app.set('trust proxy', 2); 
 // ----------------------------------------------------------------
