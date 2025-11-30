@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
-    name: String;
+    username: String;
     email: string;
     isGoogleAuth: boolean;
     phone: string;
@@ -23,7 +23,7 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
     {
-        name: { type: String, required: true },
+        username: { type: String, required: true },
         email: { type: String, required: true, unique: true, lowercase: true },
         phone: {
             type: String,

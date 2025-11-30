@@ -5,9 +5,9 @@ import { generateToken } from "../utils/generateToken";
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
-        const { name, email, password, phone } = req.body;
+        const { username, email, password, phone } = req.body;
 
-        if (!name || !email || !phone || !password) {
+        if (!username || !email || !phone || !password) {
             return res.status(400).json({ message: "All fields are required!" });
         }
         //Check is the user already exists
@@ -18,7 +18,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
         //create new User
         const newUser = new User({
-            name,
+            username,
             email,
             phone,
             password, 
@@ -40,7 +40,7 @@ export const registerUser = async (req: Request, res: Response) => {
             token,
             user: {
                 id: newUser._id,
-                name: newUser.name,
+                name: newUser.username,
                 email: newUser.email,
                 phone: newUser.phone
             }
@@ -87,7 +87,7 @@ export const loginUser = async (req: Request, res: Response) => {
             token,
             user: {
                 _id: user._id,
-                name: user.name,
+                name: user.username,
                 email: user.email,
                 phone: user.phone,
                 isAdmin: user.isAdmin,
