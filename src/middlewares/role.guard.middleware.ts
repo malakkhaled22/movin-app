@@ -22,3 +22,20 @@ export const allowRoles = (...allowedRoles: string[]) => {
         next();
     };
 };
+
+export const isBuyer = (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as any;
+
+    if (!user || !user.isBuyer) {
+        return res.status(403).json({ error: "Access denied. Buyer account required only." });
+    }
+    next();
+}
+
+export const isSeller = (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as any;
+
+    if (!user || !user.isSeller) {
+        return res.status(403).json({ error: "Access denied. Seller account required only." });
+    }
+}
