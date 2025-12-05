@@ -31,7 +31,7 @@ app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
 app.use("/api/auth", roleRoutes);
 app.use("/api/seller", propertyRoutes);
-app.use("/api/favorite",favoriteRoutes);
+app.use("/api/buyer",favoriteRoutes);
 
 app.set('trust proxy', 2); 
 // ----------------------------------------------------------------

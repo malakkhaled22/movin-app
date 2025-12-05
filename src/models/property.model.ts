@@ -37,5 +37,5 @@ const propertySchema = new Schema<IProperty>(
     {timestamps: true}
 );
 
-export const Property = mongoose.model<IProperty>("Product", propertySchema);
+export const Property = mongoose.model<IProperty>("Property", propertySchema);
 export default Property;
