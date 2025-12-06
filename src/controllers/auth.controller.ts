@@ -15,6 +15,9 @@ export const registerUser = async (req: Request, res: Response) => {
         if (existingUser) {
             return res.status(400).json({ message: "Email already exists" });
         }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: "Invalid email format" });
+        }
 
         //create new User
         const newUser = new User({

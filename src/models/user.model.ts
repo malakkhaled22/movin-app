@@ -27,15 +27,36 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>(
     {
         username: { type: String, required: true },
-        email: { type: String, required: true, unique: true, lowercase: true },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            match: [
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                "Please enter a valid email address"
+            ],
+        },
         phone: {
             type: Number,
-            required: function (): boolean { return !this.isGoogleAuth; }
+            required: function (): boolean { return !this.isGoogleAuth; },
+            validate: {
+                validator: function (value: number) {
+                    return /^[0-9]{10,15}$/.test(value.toString());
+                },
+                message: "Phone number must be between 10-15 digits"
+            }
         },
-
         password: {
             type: String,
-            required: function (): boolean { return !this.isGoogleAuth; }
+            required: function (): boolean { return !this.isGoogleAuth; },
+            validate: {
+                validator: function (value: string) {
+                    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(value);
+                },
+                message:
+                    "Password must be at least 8 characters, include uppercase, lowercase letters and numbers"
+            }
         },
         isSeller: { type: Boolean, default:false },
         isAdmin: { type: Boolean, default: false },
