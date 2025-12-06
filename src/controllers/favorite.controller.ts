@@ -27,7 +27,7 @@ export const addFavorite = async (req: Request, res: Response) => {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error." });
     }
-}
+};
 
 export const removeFavorite = async (req: Request, res: Response) => {
     try {
@@ -47,15 +47,15 @@ export const removeFavorite = async (req: Request, res: Response) => {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error." });
     }
-}
+};
 
-export const getAllFavorites = async (req: Request, res: Response) => { 
+export const getAllFavorites = async (req: Request, res: Response) => {
     try {
         const userId = (req.user as any)._id;
 
         const user = await User.findById(userId)
             .select("favorites")
-            .populate("favorites"); 
+            .populate("favorites");
             
         if (!user) {
             return res.status(404).json({ message: "User favorites not found." });
@@ -67,7 +67,7 @@ export const getAllFavorites = async (req: Request, res: Response) => {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error." });
     }
-}
+};
 
 export const clearAllFavorites = async (req: Request, res: Response) => {
     try {

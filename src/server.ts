@@ -10,6 +10,7 @@ import GoogleAuthRoutes from "./routes/authGoogle.route";
 import rateLimit from "express-rate-limit";
 import propertyRoutes from "./routes/properties.routes";
 import favoriteRoutes from "./routes/favorite.routes";
+import notifyRoutes from "./routes/notifications.routes";
 
 dotenv.config();
 connectDB();
@@ -31,7 +32,8 @@ app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
 app.use("/api/auth", roleRoutes);
 app.use("/api/seller", propertyRoutes);
-app.use("/api/buyer",favoriteRoutes);
+app.use("/api/buyer", favoriteRoutes);
+app.use("/api/notifications", notifyRoutes);
 
 app.set('trust proxy', 2); 
 // ----------------------------------------------------------------
