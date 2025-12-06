@@ -5,18 +5,21 @@ export interface IUser extends Document {
     username: String;
     email: string;
     isGoogleAuth: boolean;
-    phone: string;
+    phone: number;
     password: string;
+
     isAdmin?: boolean;
     isBuyer?: boolean;
     isSeller?: boolean;
      isBlocked?: boolean;
+
     profilePic: string;
     canSwitchRole?: boolean;
 
     otpCode?: string | null;
     otpExpire?: Date | null;
     isVerified?: boolean;
+    favorites?: mongoose.Types.ObjectId[];
 
     comparePassword(candidatePassword: string): Promise<boolean>;
     createPasswordResetToken(): string; 
@@ -27,7 +30,7 @@ const userSchema = new Schema<IUser>(
         username: { type: String, required: true },
         email: { type: String, required: true, unique: true, lowercase: true },
         phone: {
-            type: String,
+            type: Number,
             required: function (): boolean { return !this.isGoogleAuth; }
         },
 
@@ -44,6 +47,12 @@ const userSchema = new Schema<IUser>(
         otpExpire: { type: Date, default: null },
         isVerified: { type: Boolean, default: null },
         isGoogleAuth: { type: Boolean, default: false },
+        favorites: [{
+            type: mongoose.Types.ObjectId,
+            ref: "Property",
+            default: []
+        }],
+        
     },  
     { timestamps: true }
 );

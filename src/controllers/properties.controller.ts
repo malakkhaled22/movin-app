@@ -1,4 +1,4 @@
-import { Product } from "../models/property.model";
+import { Property } from "../models/property.model";
 import { Request, Response } from "express";
 import User from "../models/user.model";
 
@@ -12,7 +12,7 @@ export const createProperty = async (req: Request, res: Response) => {
         .status(403)
         .json({ message: "Only sellers can add properties" });
     }
-    const newProperty = await Product.create({
+    const newProperty = await Property.create({
       ...req.body,
       seller: user._id,
     });
@@ -36,7 +36,7 @@ export const deleteProperty = async (req: Request, res: Response) => {
     if (!sellerId) return res.status(404).json({ message: "user not found" });
     const seller = await User.findById(sellerId);
     if (seller?.isSeller) {
-      const deletedProperty = await Product.findOneAndDelete({
+      const deletedProperty = await Property.findOneAndDelete({
         _id: id,
         seller: sellerId, // ensures seller can only delete their own property
       });
@@ -75,7 +75,7 @@ export const updateProperty = async (req: Request, res: Response) => {
     if (!seller.isSeller)
       return res.status(403).json({ message: "Unauthorized" });
 
-    const updatedProperty = await Product.findOneAndUpdate(
+    const updatedProperty = await Property.findOneAndUpdate(
       { _id: id, seller: sellerId },
       { $set: updateFields },
       { new: true }
@@ -107,7 +107,7 @@ export const getAllProperties = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const products = await Product.find({ seller: sellerId });
+    const products = await Property.find({ seller: sellerId });
 
     return res.status(200).json({
       message: "Products fetched successfully",
@@ -124,7 +124,7 @@ export const getOneProperty = async (req: Request, res: Response) => {
     const sellerId = (req.user as any)._id;
     const productId = req.params["id"];
     if (!sellerId) return res.status(404).json({ message: "user not found" });
-    const product = await Product.findOne({ _id: productId , seller: sellerId });
+    const product = await Property.findOne({ _id: productId , seller: sellerId });
     if (!product) return res.status(404).json({ message: "product not found" });
     res.status(200).json(product);
   } catch (error) {
