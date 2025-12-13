@@ -13,6 +13,7 @@ export const createProperty = async (req: Request, res: Response) => {
     const newProperty = await Property.create({
       ...req.body,
       seller: user._id,
+      status:"pending",
     });
     await newProperty.save();
     res.status(201).json({
