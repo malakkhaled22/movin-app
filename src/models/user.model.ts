@@ -11,6 +11,7 @@ export interface IUser extends Document {
     isAdmin?: boolean;
     isBuyer?: boolean;
     isSeller?: boolean;
+     isBlocked?: boolean;
 
     profilePic: string;
     canSwitchRole?: boolean;
@@ -61,6 +62,7 @@ const userSchema = new Schema<IUser>(
         isSeller: { type: Boolean, default:false },
         isAdmin: { type: Boolean, default: false },
         isBuyer: { type: Boolean, default:false },
+        isBlocked: { type: Boolean, default: false },   
         canSwitchRole: { type: Boolean, default: true }, 
         otpCode: { type: String, default: null },
         otpExpire: { type: Date, default: null },
