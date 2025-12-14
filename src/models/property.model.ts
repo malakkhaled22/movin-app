@@ -12,7 +12,9 @@ export interface IProperty extends Document {
     images: string[];
     payment_method: string;
     seller: mongoose.Types.ObjectId;
-    isApproved: boolean;
+    status: string;
+    approvedBy: mongoose.Types.ObjectId;
+    rejectedReason?: string | null;
 }
 
 const propertySchema = new Schema<IProperty>(
@@ -32,7 +34,20 @@ const propertySchema = new Schema<IProperty>(
             ref: "User",
             required: true,
         },
-        isApproved: {type: Boolean, default: false},
+        status: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default:"pending"
+        },
+        approvedBy: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default:null,
+        },
+        rejectedReason: {
+            type: String,
+            default: null,
+        },
     },
     {timestamps: true}
 );
