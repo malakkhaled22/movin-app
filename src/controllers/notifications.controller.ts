@@ -22,7 +22,7 @@ export const addNotification = async (req: Request, res: Response) => {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const getNotifications = async (req: Request, res: Response) => {
     try {
@@ -42,7 +42,10 @@ export const markAsRead = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        await Notification.findByIdAndUpdate(id, { read: true });
+        await Notification.findByIdAndUpdate(
+            { _id: id, user: (req.user as any)._id },
+            { read: true }
+        );
 
         return res.status(200).json({ message: "Marked as read" });
     } catch (error) {
