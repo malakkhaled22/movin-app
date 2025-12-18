@@ -11,7 +11,7 @@ export interface IUser extends Document {
     isAdmin?: boolean;
     isBuyer?: boolean;
     isSeller?: boolean;
-     isBlocked?: boolean;
+    isBlocked?: boolean;
 
     profilePic: string;
     canSwitchRole?: boolean;

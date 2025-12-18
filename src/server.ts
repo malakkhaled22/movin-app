@@ -11,7 +11,6 @@ import rateLimit from "express-rate-limit";
 import propertyRoutes from "./routes/properties.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import notifyRoutes from "./routes/notifications.routes";
-import { adminRouter } from "./routes/admin.routes";
 import adminRoutes from "./routes/admin.routes";
 
 dotenv.config();
@@ -36,7 +35,6 @@ app.use("/api/auth", roleRoutes);
 app.use("/api/seller", propertyRoutes);
 app.use("/api/buyer", favoriteRoutes);
 app.use("/api/notifications", notifyRoutes);
-app.use("/api" , adminRouter)
 app.use("/api/admin", adminRoutes);
 
 app.set('trust proxy', 2); 

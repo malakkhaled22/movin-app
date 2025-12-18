@@ -32,9 +32,6 @@ export const getUsers = async (
 };
 
 
-
-
-
 export const getBlockedUsers = async (
   page: number,
   limit: number,

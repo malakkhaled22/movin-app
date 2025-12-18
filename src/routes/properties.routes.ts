@@ -5,9 +5,8 @@ import {
   getAllProperties,
   getOneProperty,
   updateProperty
-} from "../controllers/properties.controller";
+} from "../controllers/properties.seller.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
-import { isSeller } from "../middlewares/role.guard.middleware";
 
 
 const router = express.Router();
