@@ -5,7 +5,6 @@ export const blockuser = async (id: string, blocked: boolean) => {
   return User.findByIdAndUpdate(id, { isBlocked: blocked }, { new: true });
 };
 
-
 export const getUsers = async (
   page: number,
   limit: number,
@@ -30,7 +29,6 @@ export const getUsers = async (
     currentPage: page
   };
 };
-
 
 export const getBlockedUsers = async (
   page: number,
@@ -59,9 +57,3 @@ export const getBlockedUsers = async (
     currentPage: page
   };
 };
-
-
-
-
-
-

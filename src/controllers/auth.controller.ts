@@ -1,7 +1,9 @@
 import { Request, Response } from "express"; 
 import { User } from "../models/user.model";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken";
+import { blacklistedToken } from "../models/blacklistToken.model";
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -100,6 +102,25 @@ export const loginUser = async (req: Request, res: Response) => {
         });
     } catch (err) {
         console.error("Error in login: ", err);
-        res.status(500).json({message: "Server error",err});
+        res.status(500).json({ message: "Server error", err });
     }
-}
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(400).json({ message: "No token provided" });
+        }
+
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+
+        await blacklistedToken.create({
+            token,
+            expiredAt: new Date(decoded.exp * 1000),
+        });
+        res.status(200).json({ mesage: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Logout failed", error });
+    }
+};

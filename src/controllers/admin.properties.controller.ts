@@ -47,7 +47,7 @@ export const approveProperty = async (req: Request, res: Response) => {
         })
 
         res.status(200).json({
-            message: "Property approaved successfully",
+            message: "Property approved successfully",
         });
     } catch (error) {
         console.error("Error in approving property ", error);
@@ -92,13 +92,12 @@ export const rejectProperty = async (req: Request, res: Response) => {
         console.error("Error in reject property", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-};
+                };
 
 export const getAllPropertiesAdmin = async (req: Request, res: Response) => {
     try {
         const { status } = req.query;
 
-        //pagination
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
         const skip = (page - 1) * limit;
@@ -134,4 +133,3 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
