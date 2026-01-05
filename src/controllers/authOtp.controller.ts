@@ -3,7 +3,6 @@ import User from "../models/user.model";
 import { generateOTP } from "../utils/generateOTP";
 import { sendEmail } from "../utils/sendEmail";
 
-//forgot-password
 export const sendOtp = async (req: Request, res: Response) => {
     try {
         const { email } = req.body;
@@ -67,4 +66,67 @@ export const resendOtp = async (req: Request, res: Response) => {
         console.error("❌ Error in resendOtp:", error);
         res.status(500).json({ message: "Server error", error });
     }
-}
+};
+
+export const verifyOtp = async (req: Request, res: Response) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.otpCode !== otp) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        const now = new Date();
+        if (user.otpExpire && user.otpExpire < now) {
+            return res.status(400).json({ message: "OTP has expired" });
+        }
+
+        user.isVerified = true;
+        user.otpCode = undefined;
+        user.otpExpire = undefined;
+        await user.save();
+
+        return res.status(200).json({ message: "OTP verified successfully" });
+    } catch (error) {
+        console.error("Error verified OTP", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email, newPassword } = req.body;
+        
+        if (!email || !newPassword) {
+            return res.status(400).json({ message: "Email and new password are required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (!user.isVerified) {
+            return res.status(403).json({ message: "User not verified with OTP" });
+        }
+        user.password = newPassword;
+        user.otpCode = undefined;
+        user.otpExpire = undefined;
+        user.isVerified = false;
+
+        await user.save();
+        return res.status(200).json({
+            message: "Password has been reset successfully ✅",
+        });
+    } catch (error) {
+        console.error("❌ Error in resetPassword:", error);
+        res.status(500).json({ message: "Server error", error }); 
+    }
+};

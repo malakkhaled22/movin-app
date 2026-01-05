@@ -119,7 +119,7 @@ export const logoutUser = async (req: Request, res: Response) => {
             token,
             expiredAt: new Date(decoded.exp * 1000),
         });
-        res.status(200).json({ mesage: "Logged out successfully" });
+        res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed", error });
     }
