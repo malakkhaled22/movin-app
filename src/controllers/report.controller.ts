@@ -6,18 +6,20 @@ import { getReportsWithPagination } from "../services/report.service";
 
 export const createReport = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).user._id;
-        const { subject, message } = req.body;
+        const reportedBy = (req as any).user._id;
+        const { subject, message, targetType, targetId } = req.body;
 
-        const user = User.findById(userId);
-        if (!user)
-            return res.status(404).json({ message: "User not found" });
-        if (!subject || !message) {
-            return res.status(400).json({ message: "Subject and message are required" });
+        if (!subject || !message ||!targetType ||!targetId) {
+            return res.status(400).json({ message: "subject, message, targetType and targetId are required" });
         }
 
+        if (!["user", "property"].includes(targetType)) {
+            return res.status(400).json({ message: "Invalid targetType" });
+        }
         const report = await Report.create({
-            user: userId,
+            reportedBy,
+            targetType,
+            targetId,
             subject,
             message,
         });
@@ -36,7 +38,11 @@ export const getMyReports = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user._id;
 
-        const reports = await Report.find({ user: userId })
+        const reports = await Report.find({ reportedBy: userId })
+            .populate({
+                path: "targetId",
+                select: "username email type location",
+            })
             .sort({ createdAt: -1 });
         
         return res.status(200).json({ reports });
@@ -87,11 +93,10 @@ export const updateReportStatus = async (req: Request, res: Response) => {
             { status },
             { new: true }
         );
+
         if (!report) {
             return res.status(404).json({ message: "Report not found" });
         }
-        report.status = status;
-        await report.save();
 
         if (status === "resolved") {
             await createNotificationForUser({

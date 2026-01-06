@@ -19,11 +19,14 @@ export const getReportsWithPagination = async ({
     const [reports, total] = await Promise.all([
         Report.find(filter)
             .populate("reportedBy", "username email")
-            .populate("reportedUser", "username email")
-            .populate("reportedProperty", "type location")
+            .populate({
+                path: "targetId",
+                select: "username email type location",
+            })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit),
+
         Report.countDocuments(filter),
     ]);
 

@@ -1,14 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IReport extends Document{
-    reportedBy: mongoose.Types.ObjectId,
-    reportedUser: mongoose.Types.ObjectId,
-    reportedProperty:mongoose.Types.ObjectId,
-    subject: string,
-    status: string,
-    message:string,
-};
-
+export interface IReport extends Document {
+    reportedBy: mongoose.Types.ObjectId;
+    targetType: "user" | "property";
+    targetId: mongoose.Types.ObjectId;
+    subject: string;
+    message: string;
+    status: "pending" | "resolved";
+}
 const reportSchema = new Schema<IReport>(
     {
         reportedBy: {
@@ -16,25 +15,31 @@ const reportSchema = new Schema<IReport>(
             ref: "User",
             required: true,
         },
-        reportedUser: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-        },
-        reportedProperty: {
-            type: Schema.Types.ObjectId,
-            ref: "Property",
+
+        targetType: {
+            type: String,
+            enum: ["user", "property"],
             required: true,
         },
+
+        targetId: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            refPath: "targetType",
+        },
+
         subject: {
             type: String,
             required: true,
             trim: true,
         },
+
         message: {
             type: String,
             required: true,
-            trim: true
+            trim: true,
         },
+
         status: {
             type: String,
             enum: ["pending", "resolved"],
@@ -43,6 +48,5 @@ const reportSchema = new Schema<IReport>(
     },
     { timestamps: true }
 );
-
 export const Report = mongoose.model<IReport>("Report", reportSchema);
 export default Report;
