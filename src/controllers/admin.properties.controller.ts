@@ -1,12 +1,12 @@
 import { Property } from "../models/property.model";
 import { Request, Response } from "express";
 import Notification from "../models/notifications.model";
+import { getAllPropertiesAdminService, getPendingPropertiesService, reviewProperty } from "../services/adminProps.service";
 
 
 export const getPendingProperties = async (req: Request, res: Response) => {
     try {
-        const properties = await Property.find({ status: "pending" })
-            .populate("seller", "username email");
+        const properties = await getPendingPropertiesService();
     
         res.status(200).json({
             count: properties.length,
@@ -20,35 +20,17 @@ export const getPendingProperties = async (req: Request, res: Response) => {
 
 export const approveProperty = async (req: Request, res: Response) => {
     try {
-        const propertyId = req.params.id;
-        const adminId = (req.user as any)._id;
-        const property = await Property.findById(propertyId);
-        if (!property) {
-            return res.status(404).json({ message: "Property not found" });
-        }
-        if (property.status !== "pending") {
-            return res.status(400).json({
-                message: "Property already reviewed"
-            });
-        };
+        const result = await reviewProperty(
+            req.params.id,
+            (req.user as any)._id,
+            "approved"
+        );
 
-        property.status = "approved";
-        property.approvedBy = adminId;
-        property.rejectedReason = null;
+        if (!result) return res.status(404).json({ message: "Property not found" });
+        if (result === "reviewed")
+            return res.status(400).json({ message: "Property already reviewed" });
 
-        await property.save();
-
-        await Notification.create({
-            user: property.seller,
-            title: "Property Approved",
-            body: `Your property "${property.type}" has been approved.`,
-            type: "alert",
-            read: false,
-        })
-
-        res.status(200).json({
-            message: "Property approved successfully",
-        });
+        res.status(200).json({ message: "Property approved successfully" });
     } catch (error) {
         console.error("Error in approving property ", error);
         res.status(500).json({ message: "Internal Server Error" })
@@ -57,77 +39,32 @@ export const approveProperty = async (req: Request, res: Response) => {
 
 export const rejectProperty = async (req: Request, res: Response) => {
     try {
-        const { reason } = req.body;
-        const propertyId = req.params.id;
-        const adminId = (req.user as any)._id;
-        const property = await Property.findById(propertyId);
+        const result = await reviewProperty(
+            req.params.id,
+            (req.user as any)._id,
+            "rejected",
+            req.body.reason
+        );
 
-        if (!property) {
-            return res.status(404).json({ message: "Property not found" });
-        }
-        if (property.status !== "pending") {
-            return res.status(400).json({
-                message: "Property already reviewed"
-            });
-        };
+        if (!result) return res.status(404).json({ message: "Property not found" });
+        if (result === "reviewed")
+            return res.status(400).json({ message: "Property already reviewed" });
 
-        property.status = "rejected";
-        property.rejectedReason = reason || "Not specified";
-        property.approvedBy = adminId;
-
-        await property.save();
-
-        await Notification.create({
-            user: property.seller,
-            title: "Property Rejected",
-            body: `Your property "${property.type}" was rejected. Reason: ${property.rejectedReason}`,
-            type: "alert",
-            read: false,
-        });
-
-        res.status(200).json({
-            message: "Property rejected",
-        });
+        res.status(200).json({ message: "Property rejected" });
     } catch (error) {
         console.error("Error in reject property", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-                };
+};
 
 export const getAllPropertiesAdmin = async (req: Request, res: Response) => {
     try {
-        const { status } = req.query;
-
+        const status = req.query.status as string | undefined;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
-        const skip = (page - 1) * limit;
 
-        const allowedStatus = ["pending", "approved", "rejected"];
-        if (status && !allowedStatus.includes(status as string)) {
-            return res.status(400).json({ message: "Invalid status filter" });
-        }
-        
-        const filter: any = {};
-        if (status) {
-            filter.status = (status as string).trim().toLowerCase();
-        }
-        const [properties, total] = await Promise.all([
-            Property.find(filter)
-                .populate("seller", "username email")
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit),
-            Property.countDocuments(filter),
-        ]);
-
-        return res.status(200).json({
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            count: properties.length,
-            properties,
-        });
+        const result = await getAllPropertiesAdminService(page, limit, status);
+        return res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching admin properties", error);
         res.status(500).json({ message: "Internal Server Error" });

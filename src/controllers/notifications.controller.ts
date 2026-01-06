@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Notification from "../models/notifications.model";
 
+//user-triggered
 export const addNotification = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user._id;

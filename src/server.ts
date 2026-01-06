@@ -12,6 +12,7 @@ import propertyRoutes from "./routes/properties.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import notifyRoutes from "./routes/notifications.routes";
 import adminRoutes from "./routes/admin.routes";
+import reportRoutes from "./routes/report.routes";
 
 dotenv.config();
 connectDB();
@@ -36,7 +37,7 @@ app.use("/api/seller", propertyRoutes);
 app.use("/api/buyer", favoriteRoutes);
 app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
-
+app.use("api/reports", reportRoutes);
 app.set('trust proxy', 2); 
 // ----------------------------------------------------------------
 
