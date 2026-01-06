@@ -1,20 +1,20 @@
-import User from "../models/user.model";
 import { Request, Response } from "express";
 import { blockOrUnblockUser, getAdminStatsService, getUsersWithPagination } from "../services/adminUser.service";
-import Property from "../models/property.model";
+import User from "../models/user.model";
 
 
 export const blockUser = async (req: Request, res: Response) => {
   try {
-    const userId = req.params["id"];
+    const userId = req.params.id;
 
-    const user = await blockOrUnblockUser(userId, true);
+    const user = await User.findById(userId);
     if (!user)
       return res.status(404).json({ message: "user not found" });
 
     if (user.isBlocked)
       return res.status(200).json({ message: "user is already blocked" });
 
+    await blockOrUnblockUser(userId, true);
     res.status(200).json({ message: "user blocked successfully" });
   } catch (error) {
     return res.status(500).json({ message: "internal server error", error });
@@ -23,15 +23,16 @@ export const blockUser = async (req: Request, res: Response) => {
 
 export const unBlockUser = async (req: Request, res: Response) => {
   try {
-    const userId = req.params["id"];
-    const user = await blockOrUnblockUser(userId, false);
+    const userId = req.params.id;
 
+    const user = await User.findById(userId);
     if (!user)
       return res.status(404).json({ message: "user not found" });
 
     if (!user.isBlocked)
       return res.status(200).json({ message: "user already unblocked" });
 
+    await blockOrUnblockUser(userId, false);
     res.status(200).json({ message: "user unblocked successfully" });
   } catch (error) {
     return res.status(500).json({ message: "internal server error", error });

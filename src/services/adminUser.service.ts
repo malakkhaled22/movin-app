@@ -31,17 +31,15 @@ export const getUsersWithPagination = async (
   };
 };
 
-export const blockOrUnblockUser = async (
-  userId: string,
-  block: boolean
-) => {
-  const user = await User.findById(userId);
-  if (!user) return null;
-
-  if (user.isBlocked === block) return user;
-  user.isBlocked = block;
-  await user.save();
-  return user;
+export const blockOrUnblockUser = async (userId: string, status: boolean) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    { $set: { isBlocked: status } },
+    {
+      new: true,
+      runValidators: false,
+    }
+  );
 };
 
 export const getAdminStatsService = async () => {
