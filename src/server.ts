@@ -37,7 +37,7 @@ app.use("/api/seller", propertyRoutes);
 app.use("/api/buyer", favoriteRoutes);
 app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("api/reports", reportRoutes);
+app.use("/api/reports", reportRoutes);
 app.set('trust proxy', 2); 
 // ----------------------------------------------------------------
 
