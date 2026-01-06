@@ -7,17 +7,17 @@ import { getAdminStats } from "../controllers/admin.users.controller";
 import { adminSearch } from "../controllers/admin.search.controller";
 export const router = express.Router(); 
 
-router.patch('/blockuser/:id' , verifyToken , verifyAdmin , blockUser)
-router.patch('/unblockuser/:id' , verifyToken , verifyAdmin , unBlockUser)
-router.get('/getallusers' , verifyToken , verifyAdmin , getAllUsers)
-router.get('/getblockedusers' , verifyToken , verifyAdmin , getblockedUsers)
-
-router.get("/properties/pending", verifyToken, verifyAdmin, getPendingProperties);
-router.put("/properties/:id/approve", verifyToken, verifyAdmin, approveProperty);
-router.put("/properties/:id/reject", verifyToken, verifyAdmin, rejectProperty);
-
+router.patch('/users/block/:id' , verifyToken , verifyAdmin , blockUser)
+router.patch('/users/unblock/:id' , verifyToken , verifyAdmin , unBlockUser)
+router.get('/users/all' , verifyToken , verifyAdmin , getAllUsers)
+router.get('users/blocked' , verifyToken , verifyAdmin , getblockedUsers)
 
 router.get("/properties/all", verifyToken, verifyAdmin, getAllPropertiesAdmin);
+router.get("/properties/pending", verifyToken, verifyAdmin, getPendingProperties);
+router.put("/properties/approve/:id", verifyToken, verifyAdmin, approveProperty);
+router.put("/properties/reject/:id", verifyToken, verifyAdmin, rejectProperty);
+
+
 router.get("/search", verifyToken, verifyAdmin, adminSearch);
 router.get("/stats", verifyToken, verifyAdmin, getAdminStats);
 export default router;
