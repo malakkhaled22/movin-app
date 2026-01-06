@@ -10,7 +10,7 @@ export const router = express.Router();
 router.patch('/users/block/:id' , verifyToken , verifyAdmin , blockUser)
 router.patch('/users/unblock/:id' , verifyToken , verifyAdmin , unBlockUser)
 router.get('/users/all' , verifyToken , verifyAdmin , getAllUsers)
-router.get('users/blocked' , verifyToken , verifyAdmin , getblockedUsers)
+router.get('/users/blocked' , verifyToken , verifyAdmin , getblockedUsers)
 
 router.get("/properties/all", verifyToken, verifyAdmin, getAllPropertiesAdmin);
 router.get("/properties/pending", verifyToken, verifyAdmin, getPendingProperties);
