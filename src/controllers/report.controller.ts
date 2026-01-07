@@ -13,7 +13,7 @@ export const createReport = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "subject, message, targetType and targetId are required" });
         }
 
-        if (!["user", "property"].includes(targetType)) {
+        if (!["User", "Property"].includes(targetType)) {
             return res.status(400).json({ message: "Invalid targetType" });
         }
         const report = await Report.create({
@@ -80,7 +80,7 @@ export const getAllReports = async (req: Request, res: Response) => {
 
 export const updateReportStatus = async (req: Request, res: Response) => {
     try {
-        const { reportId } = req.params;
+        const  reportId  = req.params.id;
         const { status } = req.body;
 
         const allowedStatus = ["pending", "resolved"];

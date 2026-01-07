@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReport extends Document {
     reportedBy: mongoose.Types.ObjectId;
-    targetType: "user" | "property";
+    targetType: "User" | "Property";
     targetId: mongoose.Types.ObjectId;
     subject: string;
     message: string;
@@ -18,7 +18,7 @@ const reportSchema = new Schema<IReport>(
 
         targetType: {
             type: String,
-            enum: ["user", "property"],
+            enum: ["User", "Property"],
             required: true,
         },
 
