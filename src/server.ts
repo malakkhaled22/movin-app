@@ -13,22 +13,23 @@ import favoriteRoutes from "./routes/favorite.routes";
 import notifyRoutes from "./routes/notifications.routes";
 import adminRoutes from "./routes/admin.routes";
 import reportRoutes from "./routes/report.routes";
+import path from "path";
 
 dotenv.config();
 connectDB();
+
 const app = express();
+const allowed = ['https://movin-app.vercel.app'];
 
-app.use(cors());
+app.use(cors({
+    origin: allowed,
+    credentials: true
+}));
+
 app.use(express.json());
-//app.use(session({
-  //  secret: "someSecretKeyy",
-    //resave: false,
-    //saveUninitialized: false
-//}));
-
 app.use(passport.initialize());
-//app.use(passport.session());
-//User Routes
+
+// Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
@@ -38,10 +39,8 @@ app.use("/api/buyer", favoriteRoutes);
 app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
-app.set('trust proxy', 2); 
-// ----------------------------------------------------------------
 
-
+app.set('trust proxy', 2);
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -50,14 +49,18 @@ const limiter = rateLimit({
     legacyHeaders: false,
 });
 app.use(limiter);
+
 app.get("/", (req, res) => {
     res.send("Backend server is running 🚀");
 });
 
-app.use(express.static('public')); 
+// Serve Angular frontend
+const frontendPath = path.join(__dirname, 'public', 'browser');
+app.use(express.static(frontendPath));
 
-app.get('*', (req, res) => {
-    res.sendFile(__dirname + './public/browser/index.html');
+// Angular fallback route
+app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
