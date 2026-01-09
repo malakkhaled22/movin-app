@@ -10,6 +10,7 @@ export interface JwtPayload{
 }
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log("Token received in Header:", req.headers.authorization);
         const authHeader = req.headers.authorization;
 
         if (!authHeader?.startsWith("Bearer")) {
@@ -28,7 +29,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         }
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         (req as any).user = decoded;
-
+        
         next();
     } catch (error) {
         console.error("❌ Token verification failed:", error);

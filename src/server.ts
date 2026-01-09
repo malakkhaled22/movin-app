@@ -54,6 +54,12 @@ app.get("/", (req, res) => {
     res.send("Backend server is running 🚀");
 });
 
+app.use(express.static('public')); 
+
+app.get('*', (req, res) => {
+    res.sendFile(__dirname + './public/browser/index.html');
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
