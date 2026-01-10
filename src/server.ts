@@ -22,7 +22,12 @@ const app = express();
 const allowed = ['https://movin-app.vercel.app'];
 
 app.use(cors({
-    origin: allowed,
+    origin: [
+        'http://localhost:4200',
+        'https://movin-app.vercel.app'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 
