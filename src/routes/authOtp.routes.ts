@@ -6,12 +6,12 @@ import { verifyToken } from "../middlewares/auth.middleware";
 const router = express.Router();
 
 
-router.post("/forgot-password", verifyToken, sendOtp);
+router.post("/forgot-password", sendOtp);
 
-router.post("/verify-otp", verifyToken, verifyOtp);
+router.post("/verify-otp", verifyOtp);
 
-router.post("/reset-password", verifyToken, resetPassword);
+router.post("/reset-password", resetPassword);
 
-router.post("/resend-otp", verifyToken, resendOtp);
+router.post("/resend-otp", resendOtp);
 
 export default router;
