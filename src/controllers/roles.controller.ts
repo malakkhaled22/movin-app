@@ -33,7 +33,7 @@ export const chooseRole = async (req: Request, res: Response) => {
         await user.save();
 
         return res.status(200).json({
-            message: `Role chosen: ${newRole}`
+            message: `Role successfully chosen: ${newRole}`
         });
 
     } catch (error) {
