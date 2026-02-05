@@ -23,7 +23,6 @@ export const chooseRole = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        //check if already selected before
         if (user.isBuyer || user.isSeller) {
             return res.status(400).json({ message: "Role already selected!, use switch instead." });
         }
@@ -34,8 +33,7 @@ export const chooseRole = async (req: Request, res: Response) => {
         await user.save();
 
         return res.status(200).json({
-            message: `Role chosen: ${newRole}`,
-            user
+            message: `Role chosen: ${newRole}`
         });
 
     } catch (error) {

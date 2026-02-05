@@ -1,7 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { switchRole } from "../controllers/roles.controller";
-import { allowRoles } from "../middlewares/role.guard.middleware";
 import { chooseRole } from "../controllers/roles.controller";
 
 const router = express.Router();
