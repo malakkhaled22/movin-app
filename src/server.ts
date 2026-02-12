@@ -45,6 +45,7 @@ app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 
+app.use("/uploads", express.static("uploads"));
 app.set('trust proxy', 2);
 
 const limiter = rateLimit({

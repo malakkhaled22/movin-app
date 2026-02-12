@@ -3,12 +3,13 @@
     /* File Layout */
     "rootDir": "./src",
     "outDir": "./dist",
-
+    "typeRoots":["./src/types","./node_modules/@types"],
+    
     /* Environment Settings */
     "target": "ES2020",
     "module": "commonjs", 
     "moduleResolution": "node",
-    "types": ["node"],
+    "types": ["node","express","multer"],
 
     /* Outputs */
     "sourceMap": true,

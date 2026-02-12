@@ -9,7 +9,10 @@ export interface IProperty extends Document {
     bedrooms: number;
     bathrooms: number;
     available_from: Date;
-    images: string[];
+    images: {
+        url: string;
+        public_id: string;
+    }[];
     payment_method: string;
     seller: mongoose.Types.ObjectId;
     status: string;
@@ -27,7 +30,12 @@ const propertySchema = new Schema<IProperty>(
         bedrooms: {type: Number, required: true },
         bathrooms: {type: Number, required: true },
         available_from: {type: Date, required: true},
-        images: { type: [String], default: [] },
+        images: [
+        { 
+            url: {type:String },
+            public_id:{type:String},
+            }
+        ],
         payment_method: {type: String, required: true},
         seller: {
             type: Schema.Types.ObjectId,
