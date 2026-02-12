@@ -16,9 +16,10 @@ export interface IUser extends Document {
     profilePic: string;
     canSwitchRole?: boolean;
 
-    otpCode?: string | null;
-    otpExpire?: Date | null;
+    otpCode?: string;
+    otpExpire?: Date;
     isVerified?: boolean;
+    passwordResetVerification?: boolean;
     favorites?: mongoose.Types.ObjectId[];
 
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -64,9 +65,10 @@ const userSchema = new Schema<IUser>(
         isBuyer: { type: Boolean, default:false },
         isBlocked: { type: Boolean, default: false },   
         canSwitchRole: { type: Boolean, default: true }, 
-        otpCode: { type: String, default: null },
-        otpExpire: { type: Date, default: null },
-        isVerified: { type: Boolean, default: null },
+        otpCode: { type: String },
+        otpExpire: { type: Date },
+        isVerified: { type: Boolean, default: null }, //for register
+        passwordResetVerification: { type: Boolean, default: null }, //for reset flow
         isGoogleAuth: { type: Boolean, default: false },
         favorites: [{
             type: mongoose.Types.ObjectId,

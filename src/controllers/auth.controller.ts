@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken";
 import { blacklistedToken } from "../models/blacklistToken.model";
+import { generateOTP } from "../utils/generateOTP";
+import { sendEmail } from "../utils/sendEmail";
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -12,7 +14,6 @@ export const registerUser = async (req: Request, res: Response) => {
         if (!username || !email || !phone || !password) {
             return res.status(400).json({ message: "All fields are required!" });
         }
-        //Check is the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "Email already exists" });
@@ -21,7 +22,8 @@ export const registerUser = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid email format" });
         }
 
-        //create new User
+        const otp = generateOTP();
+
         const newUser = new User({
             username,
             email,
@@ -30,16 +32,27 @@ export const registerUser = async (req: Request, res: Response) => {
             isAdmin: false,
             isSeller: false,
             isBuyer: false,
-            canSwitchRole: true
+            canSwitchRole: true,
+            isVerified: false,
+            otpCode: otp,
+            otpExpire: Date.now() + 5 * 60 * 1000,
         });
         
         await newUser.save();
+
+        await sendEmail(
+            newUser.email,
+            "Verify Your Email",
+            `Your verification OTP is ${otp}`
+        );
+
         const token = generateToken({
             _id: String(newUser._id),
             isAdmin: newUser.isAdmin,
             isSeller: newUser.isSeller,
             isBuyer: newUser.isBuyer,
         });
+
         res.status(201).json({
             message: "User registered successfully",
             token,
@@ -50,11 +63,29 @@ export const registerUser = async (req: Request, res: Response) => {
                 phone: newUser.phone
             }
         });
+        console.log(`✅ OTP for ${newUser.email}: ${otp}`);
     } catch (error) {
         console.error("❌ Error in Register User:", error);
         res.status(500).json({ message: "Server error", error });
     }
 };
+
+export const verifyEmailOtp = async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.otpCode !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    if (user.otpExpire && user.otpExpire < new Date()) return res.status(400).json({ message: "OTP has expired" });
+
+    user.isVerified = true;
+    user.otpCode = undefined;
+    user.otpExpire = undefined;
+
+    await user.save();
+    res.status(200).json({ message: "Email verified successfully" });
+}
 
 export const loginUser = async (req: Request, res: Response) => {
     try {
@@ -69,6 +100,9 @@ export const loginUser = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (!user.isVerified) {
+            return res.status(403).json({ message: "Please verify your email first" });
+        }
         console.log("📌 User found:", user.password);
         console.log("📌 Entered password:", password);
 

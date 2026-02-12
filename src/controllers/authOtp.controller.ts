@@ -16,12 +16,12 @@ export const sendOtp = async (req: Request, res: Response) => {
         }
 
         const otp = generateOTP();
-
         user.otpCode = otp;
-        user.otpExpire = new Date(Date.now() + 5 * 60 * 1000); //5mins
+        user.otpExpire = new Date(Date.now() + 5 * 60 * 1000); 
+        user.passwordResetVerification = false;
+
         await user.save();
 
-        //send otp via email
         const message = `Your Movin password reset code is: ${otp}. It expires in 5 minutes.`;
         await sendEmail(user.email, "Movin Password Reset Code", message);
 
@@ -88,10 +88,10 @@ export const verifyOtp = async (req: Request, res: Response) => {
         if (user.otpExpire && user.otpExpire < now) {
             return res.status(400).json({ message: "OTP has expired" });
         }
-
-        user.isVerified = true;
+        user.passwordResetVerification = true;
         user.otpCode = undefined;
         user.otpExpire = undefined;
+
         await user.save();
 
         return res.status(200).json({ message: "OTP verified successfully" });
@@ -113,15 +113,14 @@ export const resetPassword = async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        if (!user.isVerified) {
-            return res.status(403).json({ message: "User not verified with OTP" });
+        if (!user.passwordResetVerification) {
+            return res.status(403).json({ message: "OTP not verified" });
         }
         user.password = newPassword;
-        user.otpCode = undefined;
-        user.otpExpire = undefined;
-        user.isVerified = false;
+        user.passwordResetVerification = false;
 
         await user.save();
+        
         return res.status(200).json({
             message: "Password has been reset successfully ✅",
         });
