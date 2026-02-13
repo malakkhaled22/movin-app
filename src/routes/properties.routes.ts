@@ -15,6 +15,6 @@ router.post("/properties/create", verifyToken, upload.array("images", 10), creat
 router.patch("/properties/:id", verifyToken, upload.array("images", 10), updateProperty);
 router.delete("/properties/:id", verifyToken, deleteProperty);
 router.get("/properties/getAll", verifyToken, getAllProperties);
-router.get("/properties/getOneProduct/:id" , verifyToken , getOneProperty);
+router.get("/properties/getOne/:id" , verifyToken , getOneProperty);
 
 export default router;
