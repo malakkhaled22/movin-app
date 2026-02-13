@@ -6,7 +6,9 @@ import cloudinary from "../config/cloudinary";
 export const createProperty = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    
     if (!user) return res.status(401).json({ message: "No user found" });
     if (!user.isSeller) {
       return res
@@ -36,7 +38,8 @@ export const createProperty = async (req: Request, res: Response) => {
       status:"pending",
     });
 
-
+    
+    
     res.status(201).json({
       message: "Property created successfully, pending approval",
       property: newProperty,
