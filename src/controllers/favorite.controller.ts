@@ -29,7 +29,7 @@ export const addFavorite = async (req: Request, res: Response) => {
                 userId: property.seller.toString(),
                 title: "Someone liked your property ❤️",
                 body: `${user?.username} added your property in ${property.location} to favorites.`,
-                type: "Message"
+                type: "message",
             })
         }
 
