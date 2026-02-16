@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { Property } from "../models/property.model";
+import { createNotificationForUser } from "../services/notifications.service";
 
 export const addFavorite = async (req: Request, res: Response) => {
     try {
@@ -12,11 +13,26 @@ export const addFavorite = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Property not found." });
         }
 
+        const user = await User.findById(userId);
+        if (user?.favorites?.some(fav => fav.toString() === propertyId)) {
+            return res.status(200).json({ message: "Already in favorites" });
+        }
+
         const update = await User.findByIdAndUpdate(
             userId,
             { $addToSet: { favorites: propertyId } },
             { new: true }
         );
+
+        if (property.seller.toString() !== userId.toString()) {
+            await createNotificationForUser({
+                userId: property.seller.toString(),
+                title: "Someone liked your property ❤️",
+                body: `${user?.username} added your property in ${property.location} to favorites.`,
+                type: "Message"
+            })
+        }
+
 
         return res.status(200).json({
             message: "Property added to favorites",

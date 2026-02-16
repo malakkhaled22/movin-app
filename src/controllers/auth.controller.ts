@@ -6,6 +6,7 @@ import { generateToken } from "../utils/generateToken";
 import { blacklistedToken } from "../models/blacklistToken.model";
 import { generateOTP } from "../utils/generateOTP";
 import { sendEmail } from "../utils/sendEmail";
+import { createNotificationForUser } from "../services/notifications.service";
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -78,14 +79,23 @@ export const verifyEmailOtp = async (req: Request, res: Response) => {
 
     if (user.otpCode !== otp) return res.status(400).json({ message: "Invalid OTP" });
     if (user.otpExpire && user.otpExpire < new Date()) return res.status(400).json({ message: "OTP has expired" });
+    if (user.isVerified) return res.status(400).json({ message: "User already verified" });
 
     user.isVerified = true;
     user.otpCode = undefined;
     user.otpExpire = undefined;
 
     await user.save();
+
+    await createNotificationForUser({
+        userId: user.id.toString(),
+        title: "Account Verified ✅",
+        body: "Your email has been verified successfully. You can now use all features.",
+        type: "alert",
+    });
+
     res.status(200).json({ message: "Email verified successfully" });
-}
+};
 
 export const loginUser = async (req: Request, res: Response) => {
     try {

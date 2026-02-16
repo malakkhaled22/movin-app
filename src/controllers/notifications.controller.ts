@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Notification from "../models/notifications.model";
 
-//user-triggered
 export const addNotification = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user._id;
@@ -37,7 +36,7 @@ export const getNotifications = async (req: Request, res: Response) => {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const markAsRead = async (req: Request, res: Response) => {
     try {
