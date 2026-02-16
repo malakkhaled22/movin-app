@@ -49,6 +49,7 @@ export const markAsRead = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: "Marked as read" });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

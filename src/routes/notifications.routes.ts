@@ -9,6 +9,6 @@ router.get("/all", verifyToken, getNotifications);
 router.get("/messages", verifyToken, getMessageNotifications);
 router.get("/alerts", verifyToken, getAlertNotifications);
 router.patch("/read-all",verifyToken ,markAllAsRead);
-router.patch("/:id/read", markAsRead);
+router.patch("/:id/read", verifyToken, markAsRead);
 router.delete("/clear", verifyToken, clearNotifications);
 export default router;
