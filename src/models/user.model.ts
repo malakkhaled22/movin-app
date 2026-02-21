@@ -67,8 +67,8 @@ const userSchema = new Schema<IUser>(
         canSwitchRole: { type: Boolean, default: true }, 
         otpCode: { type: String },
         otpExpire: { type: Date },
-        isVerified: { type: Boolean, default: null }, //for register
-        passwordResetVerification: { type: Boolean, default: null }, //for reset flow
+        isVerified: { type: Boolean, default: null },
+        passwordResetVerification: { type: Boolean, default: null },
         isGoogleAuth: { type: Boolean, default: false },
         favorites: [{
             type: mongoose.Types.ObjectId,
@@ -87,7 +87,6 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-//compare passwords
 userSchema.methods.comparePassword = async function (
     candidatePassword: string
 ): Promise<boolean> {

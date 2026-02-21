@@ -56,4 +56,4 @@ export const adminSearch = async (req: Request, res: Response) => {
         console.error("Admin search error", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
