@@ -18,7 +18,7 @@ router.get(
     async (req: any, res) => {
 
         return res.status(200).json({
-            message: "Google login successful 🎉",
+            message: "Google login successful",
             user:req.user.user,
             token:req.user.token,
         });
