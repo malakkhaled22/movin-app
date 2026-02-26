@@ -17,9 +17,6 @@ router.get(
     }),
     async (req: any, res) => {
 
-        // 🟢 Redirect to frontend and send token
-        //return res.redirect(`${process.env.FRONTEND_URL}/google-success?token=${token}`);
-
         return res.status(200).json({
             message: "Google login successful 🎉",
             user:req.user.user,
