@@ -1,6 +1,5 @@
 import { Router } from "express";
 import passport from "passport";
-import  jwt from "jsonwebtoken";
 const router = Router();
 
 router.get("/google",

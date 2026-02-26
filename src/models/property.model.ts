@@ -7,15 +7,11 @@ export interface IProperty extends Document {
     type: "apartment" | "villa" | "office" | "penthouse" | "townhouse";
     listingType: "rent" | "sale";
     size: string;
-    //bedrooms: number;
-    //bathrooms: number;
-    //available_from: Date;
     images: {
         url: string;
         public_id: string;
     }[];
     details: any;
-    //payment_method: string;
     seller: mongoose.Types.ObjectId;
     status: string;
     approvedBy: mongoose.Types.ObjectId;
@@ -38,16 +34,12 @@ const propertySchema = new Schema<IProperty>(
             required: true
         },
         size: { type: String, required: true },
-        //bedrooms: {type: Number, required: true },
-        //bathrooms: {type: Number, required: true },
-        //available_from: {type: Date, required: true},
         images: [
             {
                 url: String,
                 public_id: String,
             }
         ],
-        //payment_method: {type: String, required: true},
         seller: {
             type: Schema.Types.ObjectId,
             ref: "User",

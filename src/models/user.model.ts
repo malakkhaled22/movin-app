@@ -67,7 +67,7 @@ const userSchema = new Schema<IUser>(
         canSwitchRole: { type: Boolean, default: true }, 
         otpCode: { type: String },
         otpExpire: { type: Date },
-        isVerified: { type: Boolean, default: null },
+        isVerified: { type: Boolean, default: false },
         passwordResetVerification: { type: Boolean, default: null },
         isGoogleAuth: { type: Boolean, default: false },
         favorites: [{
