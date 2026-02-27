@@ -184,3 +184,85 @@ export const getOneProperty = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+export const filterProperties = async (req: Request, res: Response) => {
+  try {
+    const {
+      type,
+      minPrice,
+      maxPrice,
+      bedrooms,
+      bathrooms,
+      area,
+      pool,
+      sort
+    } = req.query;
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    let filter: any = { status: "approved" };
+
+    //Price Range
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice)
+        filter.price.$gte = Number(minPrice);
+      if (maxPrice)
+        filter.price.$lte = Number(maxPrice);
+    }
+    //Property Type
+    if (type) {
+      filter.type = type;
+    }
+    //Area
+    if (area) {
+      filter["details.area"] = Number(area);
+    }
+    //Type-specific filters
+    if (type === "apartment" || type === "penthouse") {
+      if (bedrooms)
+        filter["details.bedrooms"] = bedrooms;
+      if (bathrooms)
+        filter["details.bathrooms"] = bathrooms;
+    }
+
+    if (type === "villa") {
+      if (bedrooms)
+        filter["details.bedrooms"] = bedrooms;
+      if (bathrooms)
+        filter["details.bathrooms"] = bathrooms;
+      if (pool)
+        filter["details.pool"] = pool;
+    }
+    //Sorting
+    let sortOption: any = { createdAt: -1 };
+    if (sort === "price-asc")
+      sortOption = { price: 1 };
+    if (sort === "price-desc")
+      sortOption = { price: -1 };
+    if (sort === "newest")
+      sortOption = { createdAt: -1 };
+
+    console.log(filter);
+    const properties = await Property.find(filter)
+      .populate("seller", "username email")
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Property.countDocuments(filter);
+
+    return res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      properties,
+    });
+  } catch (error) {
+    console.error("Filter properties Error", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

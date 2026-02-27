@@ -16,12 +16,9 @@ router.get(
         session: false,
     }),
     async (req: any, res) => {
-
-        return res.status(200).json({
-            message: "Google login successful",
-            user:req.user.user,
-            token:req.user.token,
-        });
+        return res.redirect(
+            `movin://auth-success?token=${req.user.token}`
+        );
     }
 );
 

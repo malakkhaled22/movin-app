@@ -6,7 +6,7 @@ export interface IProperty extends Document {
     price: number;
     type: "apartment" | "villa" | "office" | "penthouse" | "townhouse";
     listingType: "rent" | "sale";
-    size: string;
+    size: number;
     images: {
         url: string;
         public_id: string;
@@ -33,7 +33,7 @@ const propertySchema = new Schema<IProperty>(
             enum: ["apartment", "villa", "office", "townhouse", "penthouse"],
             required: true
         },
-        size: { type: String, required: true },
+        size: { type: Number, required: true },
         images: [
             {
                 url: String,
