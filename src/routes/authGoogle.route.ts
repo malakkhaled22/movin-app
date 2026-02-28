@@ -16,6 +16,8 @@ router.get(
         session: false,
     }),
     async (req: any, res) => {
+        console.log("CALL BACK HIT");
+        console.log("USER:", req.user);
         return res.redirect(
             `movin://auth-success?token=${req.user.token}`
         );

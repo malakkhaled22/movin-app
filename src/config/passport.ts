@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+console.log("GoogleRedirectURL", process.env.GOOGLE_REDIRECT_URL);
 passport.use(
     new GoogleStrategy(
         {
@@ -35,7 +36,7 @@ passport.use(
                     isSeller: user.isSeller,
                     isBuyer: user.isBuyer,
                 });
-
+                
                 return done(null, { user, token });
             } catch (error) {
                 return done(error, false);
