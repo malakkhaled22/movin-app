@@ -12,7 +12,7 @@ router.get("/google",
 router.get(
     "/google/callback",
     passport.authenticate("google", {
-        failureRedirect: "/login",
+        failureRedirect: "movin://auth-failed",
         session: false,
     }),
     async (req: any, res) => {
