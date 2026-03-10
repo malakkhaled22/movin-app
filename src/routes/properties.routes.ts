@@ -4,8 +4,9 @@ import {
   deleteProperty,
   getAllProperties,
   getOneProperty,
+  searchPropertyLocation,
   updateProperty
-} from "../controllers/properties.seller.controller";
+} from "../controllers/properties.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/uploadProperty.middleware";
 
@@ -15,6 +16,7 @@ router.post("/properties/create", verifyToken, upload.array("images", 10), creat
 router.patch("/properties/:id", verifyToken, upload.array("images", 10), updateProperty);
 router.delete("/properties/:id", verifyToken, deleteProperty);
 router.get("/properties/getAll", verifyToken, getAllProperties);
-router.get("/properties/getOne/:id" , verifyToken , getOneProperty);
+router.get("/properties/getOne/:id", verifyToken, getOneProperty);
+router.get("/properties/search", verifyToken, searchPropertyLocation);
 
 export default router;

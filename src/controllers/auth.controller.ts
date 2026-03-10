@@ -36,7 +36,7 @@ export const registerUser = async (req: Request, res: Response) => {
             canSwitchRole: true,
             isVerified: false,
             otpCode: otp,
-            otpExpire: Date.now() + 5 * 60 * 1000,
+            otpExpire: Date.now() + 10 * 60 * 1000,
         });
         
         await newUser.save();

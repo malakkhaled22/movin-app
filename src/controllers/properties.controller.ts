@@ -268,3 +268,40 @@ export const filterProperties = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const searchPropertyLocation = async (req: Request, res: Response) => {
+  try {
+    const location = req.query.location as string;
+    const userId = (req.user as any)._id;
+
+    if (!location) return res.status(400).json({ message: "Location required" });
+
+    const properties = await Property.find({
+      location: { $regex: location, $options: "i" },
+      status: "approved"
+    });
+
+    if (req.user) {
+      const user = await User.findById(userId);
+      if (!user) return;
+
+      const existing = user.searchHistory?.find(
+        (s) => s.location === location
+      );
+
+      if (existing) {
+        existing.count += 1;
+      } else {
+        user.searchHistory?.push({
+          location,
+          count: 1
+        });
+      }
+      await user.save();
+    }
+    return res.status(200).json({ results: properties });
+  } catch (error) {
+    console.error("Search location error", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

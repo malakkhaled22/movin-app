@@ -2,7 +2,7 @@ import { isBuyer } from "../middlewares/role.guard.middleware";
 import  express from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { addFavorite, clearAllFavorites, getAllFavorites, removeFavorite } from "../controllers/favorite.controller";
-import { filterProperties } from "../controllers/properties.seller.controller";
+import { filterProperties } from "../controllers/properties.controller";
 
 const router = express.Router();
 

@@ -20,7 +20,8 @@ export interface IUser extends Document {
     otpExpire?: Date;
     isVerified?: boolean;
     passwordResetVerification?: boolean;
-    favorites?: mongoose.Types.ObjectId[];
+    favorites?: Schema.Types.ObjectId[];
+    searchHistory?: { location: string, count: number }[];
 
     comparePassword(candidatePassword: string): Promise<boolean>;
     createPasswordResetToken(): string; 
@@ -60,11 +61,11 @@ const userSchema = new Schema<IUser>(
                     "Password must be at least 8 characters, include uppercase, lowercase letters and numbers"
             }
         },
-        isSeller: { type: Boolean, default:false },
+        isSeller: { type: Boolean, default: false },
         isAdmin: { type: Boolean, default: false },
-        isBuyer: { type: Boolean, default:false },
-        isBlocked: { type: Boolean, default: false },   
-        canSwitchRole: { type: Boolean, default: true }, 
+        isBuyer: { type: Boolean, default: false },
+        isBlocked: { type: Boolean, default: false },
+        canSwitchRole: { type: Boolean, default: true },
         otpCode: { type: String },
         otpExpire: { type: Date },
         isVerified: { type: Boolean, default: false },
@@ -75,8 +76,16 @@ const userSchema = new Schema<IUser>(
             ref: "Property",
             default: []
         }],
-        
-    },  
+        searchHistory: [
+            {
+                location: String,
+                count: {
+                    type: Number,
+                    default: 1
+                }
+            }
+        ],
+    },
     { timestamps: true }
 );
 
