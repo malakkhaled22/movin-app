@@ -171,10 +171,12 @@ export const getOneProperty = async (req: Request, res: Response) => {
 
     if (!sellerId) return res.status(404).json({ message: "User not found" });
 
-    const product = await Property.findOne({
+    const product = await Property.findByIdAndUpdate({
       _id: productId,
       seller: sellerId,
-    });
+    },
+      {$inc: {views: 1}},
+    );
 
     if (!product) return res.status(404).json({ message: "Property not found" });
 

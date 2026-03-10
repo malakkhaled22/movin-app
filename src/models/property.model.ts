@@ -16,6 +16,7 @@ export interface IProperty extends Document {
     status: string;
     approvedBy: mongoose.Types.ObjectId;
     rejectedReason?: string | null;
+    views: number;
 }
 
 const propertySchema = new Schema<IProperty>(
@@ -63,6 +64,10 @@ const propertySchema = new Schema<IProperty>(
             type: String,
             default: null,
         },
+        views: {
+            type: Number,
+            default: 0,
+        }
     },
     { timestamps: true }
 );

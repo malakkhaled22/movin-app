@@ -13,6 +13,7 @@ import favoriteRoutes from "./routes/favorite.routes";
 import notifyRoutes from "./routes/notifications.routes";
 import adminRoutes from "./routes/admin.routes";
 import reportRoutes from "./routes/report.routes";
+import recommendRoutes from "./routes/recommendations.routes";
 import path from "path";
 
 dotenv.config();
@@ -44,7 +45,7 @@ app.use("/api/buyer", favoriteRoutes);
 app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
-
+app.use("/api/recommend", recommendRoutes);
 app.use("/uploads", express.static("uploads"));
 app.set('trust proxy', 2);
 

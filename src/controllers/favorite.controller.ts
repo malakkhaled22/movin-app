@@ -5,7 +5,7 @@ import { createNotificationForUser } from "../services/notifications.service";
 
 export const addFavorite = async (req: Request, res: Response) => {
     try {
-        const userId = (req.user as any)._id;
+        const userId = (req.user as any)._id.toString();
         const propertyId = req.params.propertyId;
 
         const property = await Property.findById(propertyId);
