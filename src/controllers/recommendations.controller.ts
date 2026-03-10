@@ -51,6 +51,10 @@ export const getRecommendations = async (req: Request, res: Response) => {
                 //similarity bedrooms or bathrooms
                 if (fav.details?.bedrooms === property.details?.bedrooms || fav.details?.bathrooms === property.details?.bathrooms)
                     score += 0.2;
+
+                //similar details
+                if (fav.details?.elevator === property.details?.elevator || fav.details?.pool === property.details?.pool)
+                    score += 0.1;
             });
             //popularity boost
             if (property.views > 20)
