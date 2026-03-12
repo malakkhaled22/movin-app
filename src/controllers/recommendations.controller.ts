@@ -13,7 +13,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
 
         const favorites = user.favorites as any[];
         const topLocation = user.searchHistory?.slice().sort((a, b) => b.count - a.count)[0]?.location;
-        //No favs => Most viewed
+        //No favs => Most viewed or search location
         if (favorites.length === 0 && topLocation) {
             const popular = await Property.find({ status: "approved" })
                 .sort({ views: -1 })

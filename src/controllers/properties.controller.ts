@@ -143,7 +143,7 @@ export const updateProperty = async (req: any, res: any) => {
   }
 };
 
-export const getAllProperties = async (req: Request, res: Response) => {
+export const getAllSellerProperties = async (req: Request, res: Response) => {
   try {
     const sellerId = (req.user as any)._id;
 
@@ -164,7 +164,7 @@ export const getAllProperties = async (req: Request, res: Response) => {
   }
 };
 
-export const getOneProperty = async (req: Request, res: Response) => {
+export const getOneSellerProperty = async (req: Request, res: Response) => {
   try {
     const sellerId = (req.user as any)._id;
     const productId = req.params["id"];
@@ -303,5 +303,18 @@ export const searchPropertyLocation = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Search location error", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getRecentProperties = async (req: Request, res: Response) => {
+  try {
+    const properties = await Property.find({ status: "approved" })
+      .sort({ createdAt: -1 })
+      .limit(15);
+    if (!properties) return res.status(404).json({ message: "Properties not found" });
+    return res.status(200).json({ recentProperties: properties });
+  } catch (error) {
+    console.error("Get recent properties error ", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
