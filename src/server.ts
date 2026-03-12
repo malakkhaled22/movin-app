@@ -24,7 +24,7 @@ const allowed = ['https://movin-app.vercel.app'];
 
 app.use(cors({
     origin: [
-        '*',
+        "*",
         'http://localhost:4200',
         'https://movin-app.vercel.app'
     ],
