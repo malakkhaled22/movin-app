@@ -143,7 +143,7 @@ export const updateProperty = async (req: any, res: any) => {
   }
 };
 
-export const getAllSellerProperties = async (req: Request, res: Response) => {
+export const getAllProperties = async (req: Request, res: Response) => {
   try {
     const sellerId = (req.user as any)._id;
 
@@ -164,7 +164,7 @@ export const getAllSellerProperties = async (req: Request, res: Response) => {
   }
 };
 
-export const getOneSellerProperty = async (req: Request, res: Response) => {
+export const getOneProperty = async (req: Request, res: Response) => {
   try {
     const sellerId = (req.user as any)._id;
     const productId = req.params["id"];
@@ -206,7 +206,7 @@ export const filterProperties = async (req: Request, res: Response) => {
 
     let filter: any = { status: "approved" };
 
-    //Price Range
+    
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice)
@@ -214,15 +214,15 @@ export const filterProperties = async (req: Request, res: Response) => {
       if (maxPrice)
         filter.price.$lte = Number(maxPrice);
     }
-    //Property Type
+    
     if (type) {
       filter.type = type;
     }
-    //Area
+    
     if (area) {
       filter["details.area"] = Number(area);
     }
-    //Type-specific filters
+
     if (type === "apartment" || type === "penthouse") {
       if (bedrooms)
         filter["details.bedrooms"] = bedrooms;
@@ -238,7 +238,7 @@ export const filterProperties = async (req: Request, res: Response) => {
       if (pool)
         filter["details.pool"] = pool;
     }
-    //Sorting
+    
     let sortOption: any = { createdAt: -1 };
     if (sort === "price-asc")
       sortOption = { price: 1 };

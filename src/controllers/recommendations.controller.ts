@@ -13,8 +13,9 @@ export const getRecommendations = async (req: Request, res: Response) => {
 
         const favorites = user.favorites as any[];
         const topLocation = user.searchHistory?.slice().sort((a, b) => b.count - a.count)[0]?.location;
+
         //No favs => Most viewed or search location
-        if (favorites.length === 0 && topLocation) {
+        if (favorites.length === 0 && !topLocation) {
             const popular = await Property.find({ status: "approved" })
                 .sort({ views: -1 })
                 .limit(10);
@@ -34,7 +35,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
                 { location: { $in: favLocations } },
                 { listingType: { $in: favListingType } }
             ]
-        }).limit(50);
+        }).limit(100);
 
         const results = properties.map(property => {
             let score = 0;
@@ -78,6 +79,14 @@ export const getRecommendations = async (req: Request, res: Response) => {
         });
 
         results.sort((a, b) => b.score - a.score);
+
+        if (results.length === 0) {
+            const popular = await Property.find({ status: "approved" })
+                .sort({ views: -1 })
+                .limit(10);
+            
+            return res.status(200).json({ recommendations: popular });
+        }
 
         return res.json({ recommendations: results.slice(0, 10) });
     } catch (error) {
