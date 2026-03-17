@@ -302,7 +302,7 @@ export const searchPropertyLocation = async (req: Request, res: Response) => {
     return res.status(200).json({ results: properties });
   } catch (error) {
     console.error("Search location error", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
@@ -316,5 +316,23 @@ export const getRecentProperties = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Get recent properties error ", error);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getPropertyByType = async (req: Request, res: Response) => {
+  try {
+    const type = req.query.type as string;
+
+    if (!type) return res.status(404).json({ message: "Type is required" });
+
+    const properties = await Property.find({
+      listingType: { $regex: type, $options: "i" },
+      status: "approved"
+    });
+
+    return res.status(200).json({ results: properties });
+  } catch (error) {
+    console.error("properties by type error", error);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };

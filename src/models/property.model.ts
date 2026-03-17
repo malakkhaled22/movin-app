@@ -17,6 +17,14 @@ export interface IProperty extends Document {
     approvedBy: mongoose.Types.ObjectId;
     rejectedReason?: string | null;
     views: number;
+    auction?: {
+        isAuction: boolean;
+        startPrice?: number;
+        currentBid?: number;
+        startTime: Date;
+        endTime?: Date;
+        totalBids: number;
+    };
 }
 
 const propertySchema = new Schema<IProperty>(
@@ -67,7 +75,15 @@ const propertySchema = new Schema<IProperty>(
         views: {
             type: Number,
             default: 0,
-        }
+        },
+        auction: {
+            isAuction: { type: Boolean, default: false },
+            startPrice: { type: Number },
+            currentBid: { type: Number },
+            startTime: { type: Date },
+            endTime: { type: Date },
+            totalBids: { type: Number, default: 0 }
+        },
     },
     { timestamps: true }
 );

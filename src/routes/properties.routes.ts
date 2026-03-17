@@ -4,6 +4,7 @@ import {
   deleteProperty,
   getAllProperties,
   getOneProperty,
+  getPropertyByType,
   getRecentProperties,
   searchPropertyLocation,
   updateProperty
@@ -20,5 +21,5 @@ router.get("/properties/getAll", verifyToken, getAllProperties);
 router.get("/properties/getOne/:id", verifyToken, getOneProperty);
 router.get("/properties/search", verifyToken, searchPropertyLocation);
 router.get("/properties/recent-properties", verifyToken, getRecentProperties);
-
+router.get("/properties/listing-type", verifyToken, getPropertyByType);
 export default router;

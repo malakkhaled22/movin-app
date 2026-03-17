@@ -14,7 +14,10 @@ import notifyRoutes from "./routes/notifications.routes";
 import adminRoutes from "./routes/admin.routes";
 import reportRoutes from "./routes/report.routes";
 import recommendRoutes from "./routes/recommendations.routes";
+import auctionRoutes from "./routes/auctions.routes";
 import path from "path";
+import http from "http";
+import { initSocket } from "./socket";
 
 dotenv.config();
 connectDB();
@@ -22,9 +25,10 @@ connectDB();
 const app = express();
 const allowed = ['https://movin-app.vercel.app'];
 
+const server = http.createServer(app);
+initSocket(server);
 app.use(cors({
     origin: [
-        "*",
         'http://localhost:4200',
         'https://movin-app.vercel.app'
     ],
@@ -47,6 +51,7 @@ app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/recommend", recommendRoutes);
+app.use("/api/buyer", auctionRoutes);
 app.use("/uploads", express.static("uploads"));
 app.set('trust proxy', 2);
 
@@ -64,7 +69,6 @@ app.get("/", (req, res) => {
 
 // Serve Angular frontend
 const frontendPath = path.join(__dirname, 'public', 'browser');
-app.use(express.static(frontendPath));
 
 // Angular fallback route
 app.get(/^(?!\/api).*/, (req, res) => {
@@ -72,6 +76,6 @@ app.get(/^(?!\/api).*/, (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
