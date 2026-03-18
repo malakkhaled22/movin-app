@@ -69,7 +69,8 @@ app.get("/", (req, res) => {
 
 // Serve Angular frontend
 const frontendPath = path.join(__dirname, 'public', 'browser');
-
+//serve angular static files
+app.use(express.static(frontendPath));
 // Angular fallback route
 app.get(/^(?!\/api).*/, (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
