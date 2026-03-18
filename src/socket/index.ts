@@ -7,7 +7,13 @@ let io: Server;
 export const initSocket = (server: any) => {
     io = new Server(server, {
         cors: {
-            origin: "*"
+            origin: [
+                'http://localhost:4200',
+                'https://movin-app.vercel.app'
+            ],
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            credentials: true
         }
     });
 

@@ -34,12 +34,22 @@ export const createProperty = async (req: Request, res: Response) => {
         });
       }
     }
-
+    
     const newProperty = await Property.create({
       ...req.body,
       images,
       seller: user._id,
       status: "pending",
+      auction: req.body.auction
+      ? {
+          isAuction: req.body.auction.isAuction ?? false,
+          startPrice: req.body.auction.startPrice ?? 0,
+          currentBid: req.body.auction.startPrice ?? 0,
+          startTime: req.body.auction.startTime ? new Date(req.body.auction.startTime) : undefined,
+          endTime: req.body.auction.endTime ? new Date(req.body.auction.endTime) : undefined,
+          totalBids: 0,
+        }
+      : undefined,
     });
 
     res.status(201).json({
