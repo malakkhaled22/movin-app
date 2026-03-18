@@ -1,5 +1,5 @@
 import Notification from "../models/notifications.model";
-
+import { io } from "../socket";
 
 export const createNotificationForUser = async ({
     userId,
@@ -12,7 +12,7 @@ export const createNotificationForUser = async ({
     body: string;
     type?: string;
 }) => {
-    return await Notification.create({
+    const notification= await Notification.create({
         user: userId,
         title,
         body,
@@ -20,4 +20,7 @@ export const createNotificationForUser = async ({
         read: false,
         createdAt: new Date(),
     });
+
+    io.to(userId).emit("newNotification", notification);
+    return Notification;
 };

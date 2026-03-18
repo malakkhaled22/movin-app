@@ -1,6 +1,8 @@
 import { Property } from "../models/property.model";
 import Notification from "../models/notifications.model";
 import mongoose from "mongoose";
+import User from "../models/user.model";
+import { createNotificationForUser } from "./notifications.service";
 
 export const getPendingPropertiesService = async () => {
     return Property.find({ status: "pending" })
@@ -34,6 +36,31 @@ export const reviewProperty = async (
         read: false,
     });
 
+    if (status === "approved" && property.auction?.isAuction) {
+        const users = await User.find({
+            $or: [
+                { favorites: property._id },
+                { "searchHistory.location": property.location },
+                { "favorites.type": property.type },
+                { "favorites.listingType": property.listingType }
+            ]
+        }) as any[];
+
+        const uniqueUsers = Array.from(
+            new Map(users.map(u => [u._id.toString(), u])).values()
+        );
+
+        await Promise.all(
+            uniqueUsers.map(user => 
+                createNotificationForUser({
+                    userId: user._id.toString(),
+                    title: "New Auction Available!",
+                    body: `New auction has started on a property in ${property.location}`,
+                    type: "alert"
+                })
+            )
+        )
+    }
     return property;
 };
 
