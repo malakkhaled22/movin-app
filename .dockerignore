@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Angular build
+dist/
+out-tsc/
+.angular/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.suo
+.ntvs
+*.njsproj
+*.log
+.DS_Store
+Thumbs.db
+
+# Optional
+coverage/
