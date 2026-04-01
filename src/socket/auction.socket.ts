@@ -26,8 +26,9 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
     socket.on("joinAuction", async (propertyId: string) => {
         try {
-            socket.join(propertyId);
-
+            const roomId = propertyId.toString();
+            socket.join(roomId);
+            console.log("JOINED ROOM: ", roomId);
             const property = await Property.findById(propertyId);
 
             if (!property || !property.auction?.isAuction) {
@@ -71,6 +72,8 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
     socket.on("placeBid", async ({ propertyId, amount, userId }: PlaceBidData) => {
         try {
+            const roomId = propertyId.toString();
+            console.log("ROOM:", roomId);
             const now = Date.now();
             const lastTime = lastBidTime.get(socket.id) || 0;
             if (now - lastTime < 1000) {
@@ -105,7 +108,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
                 await updatedProperty.save();
 
-                io.to(propertyId).emit("auctionExtended", {
+                io.to(roomId).emit("auctionExtended", {
                     endTime: updatedProperty.auction?.endTime,
                     status: getAuctionStatus(updatedProperty.auction?.endTime)
                 });
@@ -115,18 +118,19 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 user: userId,
                 amount
             });
-            io.to(propertyId).emit("newBid", {
+            
+            io.emit("newBid", {
                 amount,
                 userId,
                 endTime: updatedProperty.auction?.endTime,
                 status: getAuctionStatus(updatedProperty.auction?.endTime)
             });
-            socket.on("disconnect", () => {
-                lastBidTime.delete(socket.id);
-            });
         } catch (error) {
             socket.emit("bidError", "Server error");
         }
+    });
+    socket.on("disconnect", () => {
+        lastBidTime.delete(socket.id);
     });
 };
 
@@ -165,7 +169,7 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 });
             }
         }
-        io.to(propertyId).emit("auctionEnded", {
+        io.to(propertyId.toString()).emit("auctionEnded", {
             winner,
             amount,
             status: "ended"
