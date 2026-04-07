@@ -11,6 +11,29 @@ type PlaceBidData = {
 const lastBidTime = new Map<string, number>();
 const auctionTimers = new Map<string, NodeJS.Timeout>();
 
+const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
+    const roomId = propertyId.toString();
+
+    if (auctionTimers.has(propertyId)) {
+        clearTimeout(auctionTimers.get(propertyId)!);
+        auctionTimers.delete(propertyId);
+    }
+
+    const now = new Date();
+    const timeLeft = endTime.getTime() - now.getTime();
+
+    if (timeLeft <= 0) {
+        endAuction(io, propertyId);
+        return;
+    }
+
+    const timer = setTimeout(() => {
+        endAuction(io, propertyId);
+        auctionTimers.delete(propertyId);
+    }, timeLeft);
+
+    auctionTimers.set(propertyId, timer);
+}
 const getAuctionStatus = (endTime?: Date) => {
     if (!endTime) return "ended";
     const now = new Date();
@@ -39,21 +62,9 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 .sort({ createdAt: -1 })
                 .limit(10)
                 .populate("user", "name");
-            const now = new Date();
-            const endTime = property.auction.endTime;
 
-            if (endTime) {
-                const timeLeft = endTime.getTime() - now.getTime();
-
-                if (timeLeft > 0 && !auctionTimers.has(propertyId)) {
-                    const timer = setTimeout(() => {
-                        endAuction(io, propertyId);
-
-                        auctionTimers.delete(propertyId);
-                    }, timeLeft);
-
-                    auctionTimers.set(propertyId, timer);
-                }
+            if (property.auction.endTime) {
+                scheduleAuctionEnd(io, propertyId, property.auction.endTime);
             }
             const status = getAuctionStatus(property.auction.endTime);
 
@@ -108,20 +119,26 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
                 await updatedProperty.save();
 
+                scheduleAuctionEnd(io, propertyId, updatedProperty.auction!.endTime!);
+
                 io.to(roomId).emit("auctionExtended", {
                     endTime: updatedProperty.auction?.endTime,
                     status: getAuctionStatus(updatedProperty.auction?.endTime)
                 });
             }
-            await Bid.create({
+
+            const newBid = await Bid.create({
                 property: propertyId,
                 user: userId,
                 amount
             });
-            
-            io.emit("newBid", {
-                amount,
-                userId,
+
+            const populatedBid = await newBid.populate("user", "name");
+
+            io.to(roomId).emit("newBid", {
+                bid: populatedBid,
+                currentBid: updatedProperty.auction?.currentBid,
+                totalBids: updatedProperty.auction?.totalBids,
                 endTime: updatedProperty.auction?.endTime,
                 status: getAuctionStatus(updatedProperty.auction?.endTime)
             });
@@ -145,6 +162,11 @@ export const endAuction = async (io: Server, propertyId: string) => {
         property.auction.isAuction = false;
         await property.save();
 
+        if (auctionTimers.has(propertyId)) {
+            clearTimeout(auctionTimers.get(propertyId)!);
+            auctionTimers.delete(propertyId);
+        }
+        
         const winner = highestBid?.user;
         const amount = highestBid?.amount || property.auction.startPrice;
         
@@ -170,7 +192,7 @@ export const endAuction = async (io: Server, propertyId: string) => {
             }
         }
         io.to(propertyId.toString()).emit("auctionEnded", {
-            winner,
+            winnerId: winner?._id?.toString(),
             amount,
             status: "ended"
         });
