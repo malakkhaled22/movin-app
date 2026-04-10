@@ -70,6 +70,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             socket.emit("auctionData", {
                 property,
+                startPrice: property.auction.startPrice,
                 currentBid: property.auction.currentBid ?? property.auction.startPrice ?? 0,
                 totalBids: property.auction.totalBids || 0,
                 endTime: property.auction.endTime,
