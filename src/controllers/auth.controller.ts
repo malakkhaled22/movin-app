@@ -11,7 +11,8 @@ import { createNotificationForUser } from "../services/notifications.service";
 export const registerUser = async (req: Request, res: Response) => {
     try {
         const { username, email, password, phone } = req.body;
-
+        const location = req.body.location || "";
+        const bio = req.body.bio || "";
         if (!username || !email || !phone || !password) {
             return res.status(400).json({ message: "All fields are required!" });
         }
@@ -35,6 +36,8 @@ export const registerUser = async (req: Request, res: Response) => {
             isBuyer: false,
             canSwitchRole: true,
             isVerified: false,
+            location,
+            bio,
             otpCode: otp,
             otpExpire: Date.now() + 10 * 60 * 1000,
         });

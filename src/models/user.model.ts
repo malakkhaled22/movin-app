@@ -7,6 +7,8 @@ export interface IUser extends Document {
     isGoogleAuth: boolean;
     phone: number;
     password: string;
+    location: string;
+    bio: string;
 
     isAdmin?: boolean;
     isBuyer?: boolean;
@@ -61,6 +63,8 @@ const userSchema = new Schema<IUser>(
                     "Password must be at least 8 characters, include uppercase, lowercase letters and numbers"
             }
         },
+        location: { type: String, default: "" },
+        bio:{type:String,default:""},
         isSeller: { type: Boolean, default: false },
         isAdmin: { type: Boolean, default: false },
         isBuyer: { type: Boolean, default: false },
