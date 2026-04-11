@@ -25,7 +25,8 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const allowed = ['https://movin-app.vercel.app'];
+const allowed = ['https://movin-app.vercel.app',
+                'https://movin-backend.fly.dev'];
 
 const server = http.createServer(app);
 initSocket(server);
@@ -33,6 +34,7 @@ app.use(cors({
     origin: [
         'http://localhost:4200',
         'https://movin-app.vercel.app',
+        'https://movin-backend.fly.dev',
         "*"
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
