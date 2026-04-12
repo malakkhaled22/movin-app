@@ -31,3 +31,92 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const  getAuctionStatus = (endTime?:Date)=>{
+    if(!endTime) return "ended";
+
+    const now = new Date();
+    const diff = endTime.getTime() - now.getTime();
+
+    if(diff <= 0) return "ended";
+    if(diff <= 60000) return "endingSoon"
+
+    return "active";
+};
+
+export const getAllAuctionProperties = async (req: Request, res: Response) => {
+    try {
+    const now = new Date();
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter = {
+        "auction.isAuction": true,
+        "auction.endTime": { $gt: now },
+        status: "approved"
+    };
+
+    const totalAuctions = await Property.countDocuments(filter);
+
+    const properties = await Property.find(filter)
+        .populate("seller", "username")
+        .select("description location images auction seller type listingType size views")
+        .sort({ "auction.endTime": 1 })
+        .skip(skip)
+        .limit(limit);
+
+    const auctions = properties.map((p) => ({
+        _id: p._id,
+        description: p.description,
+        location: p.location,
+        image: p.images?.[0]?.url || null,
+
+        startPrice: p.auction?.startPrice || 0,
+        currentBid: p.auction?.currentBid || p.auction?.startPrice || 0,
+        totalBids: p.auction?.totalBids || 0,
+        endTime: p.auction?.endTime,
+        status: getAuctionStatus(p.auction?.endTime),
+
+        seller: p.seller,
+        type: p.type,
+        listingType: p.listingType,
+        size: p.size,
+        views: p.views
+    }));
+
+    const endingSoon = await Property.countDocuments({
+        ...filter,
+        "auction.endTime": { $gt: now, $lte: new Date(now.getTime() + 60000) }
+    });
+
+    const totalBidsAgg = await Property.aggregate([
+        { $match: filter },
+        { $group: { _id: null, totalBids: { $sum: "$auction.totalBids" } } }
+    ]);
+
+    const totalBids = totalBidsAgg[0]?.totalBids || 0;
+
+    return res.status(200).json({
+        success: true,
+        summary: {
+        activeAuctions: totalAuctions,
+        endingSoon,
+        totalBids
+        },
+        pagination: {
+        page,
+        limit,
+        totalAuctions,
+        totalPages: Math.ceil(totalAuctions / limit)
+        },
+        auctions
+        });
+    } catch (error) {
+        console.error("Error in Auction Details", error);
+        return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+};

@@ -56,8 +56,8 @@ app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/recommend", recommendRoutes);
-app.use("/api/buyer", auctionRoutes);
 app.use("/api/users", profileRoutes);
+app.use("/api/properties",auctionRoutes);
 app.use("/uploads", express.static("uploads"));
 app.set('trust proxy', 2);
 
