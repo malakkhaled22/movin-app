@@ -1,8 +1,8 @@
 const { io } = require("socket.io-client");
 
-const socket = io("https://movin-backend.fly.dev");
+const socket = io("http://localhost:3000");
 
-const PROPERTY_ID = "69d452389117e800b6a4526a";
+const PROPERTY_ID = "69dad4f33b3cd7d9a04258e4";
 const USER_ID = "69ce47ca3260b566ba8bb20f";
 
 socket.on("connect", () => {
@@ -14,7 +14,7 @@ socket.on("connect", () => {
         console.log("📌 Sending bid...");
         socket.emit("placeBid", {
             propertyId: PROPERTY_ID,
-            amount: 600000,
+            amount: 26000000,
             userId: USER_ID
         });
     }, 3000);

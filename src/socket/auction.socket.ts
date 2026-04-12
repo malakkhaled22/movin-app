@@ -12,8 +12,6 @@ const lastBidTime = new Map<string, number>();
 const auctionTimers = new Map<string, NodeJS.Timeout>();
 
 const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
-    const roomId = propertyId.toString();
-
     if (auctionTimers.has(propertyId)) {
         clearTimeout(auctionTimers.get(propertyId)!);
         auctionTimers.delete(propertyId);
@@ -134,10 +132,17 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 amount
             });
 
-            const populatedBid = await newBid.populate("user", "name");
+            const populatedBid = await newBid.populate("user", "username");
 
+            const bidResponse = {
+                _id: populatedBid._id,
+                property: populatedBid.property,
+                amount: populatedBid.amount,
+                createdAt: populatedBid.createdAt,
+                user: (populatedBid.user as any).username,
+            };
             io.to(roomId).emit("newBid", {
-                bid: populatedBid,
+                bid: bidResponse,
                 currentBid: updatedProperty.auction?.currentBid,
                 totalBids: updatedProperty.auction?.totalBids,
                 endTime: updatedProperty.auction?.endTime,
@@ -158,7 +163,7 @@ export const endAuction = async (io: Server, propertyId: string) => {
         if (!property || !property.auction?.isAuction) return;
         const highestBid = await Bid.findOne({ property: propertyId })
             .sort({ amount: -1 })
-            .populate("user", "name");
+            .populate("user", "_id username");
         
         property.auction.isAuction = false;
         await property.save();
@@ -182,18 +187,22 @@ export const endAuction = async (io: Server, propertyId: string) => {
 
         const allBidders = await Bid.find({ property: propertyId }).distinct("user");
 
+        const winnerId = highestBid?.user?._id?.toString();
+
         for (const userId of allBidders) {
-            if (userId.toString() !== winner?._id.toString()) {
-                await createNotificationForUser({
-                    userId: userId.toString(),
-                    title: "Auction Ended",
-                    body: "Unfortunately you did not won that auction",
-                    type: "message"
-                });
-            }
+            const id = userId.toString();
+
+            if (id === winnerId) continue;
+
+            await createNotificationForUser({
+                userId: id,
+                title: "Auction Ended",
+                body: "Unfortunately you did not win that auction",
+                type: "message"
+            });
         }
         io.to(propertyId.toString()).emit("auctionEnded", {
-            winnerId: winner?._id?.toString(),
+            winnerId: winnerId,
             amount,
             status: "ended"
         });

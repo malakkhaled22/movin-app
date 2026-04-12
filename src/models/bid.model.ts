@@ -5,6 +5,8 @@ export interface IBid extends Document{
     property: mongoose.Types.ObjectId;
     user: mongoose.Types.ObjectId;
     amount: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 };
 
 const bidSchema = new Schema<IBid>({
