@@ -5,9 +5,26 @@ import { createNotificationForUser } from "../services/notifications.service";
 
 type PlaceBidData = {
     propertyId: string;
-    amount: number;
     userId: string;
+
+    amount?: number;
+    increment?: number;
+    percent?: number;
 };
+const calculateBidAmount = (
+    currentBid: number,
+    startPrice: number,
+    data: PlaceBidData
+) => {
+    const base = currentBid || startPrice;
+
+    if (data.amount !== undefined) return data.amount;
+    if (data.increment !== undefined) return base + data.increment;
+    if (data.percent !==undefined) return base + (base * data.percent) / 100;
+
+    return base;
+};
+
 const lastBidTime = new Map<string, number>();
 const auctionTimers = new Map<string, NodeJS.Timeout>();
 
@@ -50,6 +67,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             const roomId = propertyId.toString();
             socket.join(roomId);
             console.log("JOINED ROOM: ", roomId);
+
             const property = await Property.findById(propertyId);
 
             if (!property || !property.auction?.isAuction) {
@@ -65,7 +83,13 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 scheduleAuctionEnd(io, propertyId, property.auction.endTime);
             }
             const status = getAuctionStatus(property.auction.endTime);
-
+            const bidsResponse = bids.map((bid) => ({
+                _id: bid._id,
+                property: bid.property,
+                amount: bid.amount,
+                createdAt: bid.createdAt,
+                user: (bid.user as any).username
+            }));
             socket.emit("auctionData", {
                 property,
                 startPrice: property.auction.startPrice,
@@ -73,14 +97,14 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 totalBids: property.auction.totalBids || 0,
                 endTime: property.auction.endTime,
                 status,
-                bids
+                bidsResponse
             });
         } catch (error) {
             socket.emit("auctionError", "Server error");
         }
     });
 
-    socket.on("placeBid", async ({ propertyId, amount, userId }: PlaceBidData) => {
+    socket.on("placeBid", async ({ propertyId, amount,increment,percent, userId }: PlaceBidData) => {
         try {
             const roomId = propertyId.toString();
             console.log("ROOM:", roomId);
@@ -90,20 +114,36 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 return socket.emit("bidError", "Too many bids");
             }
             lastBidTime.set(socket.id, now);
+
+            const property = await Property.findById(propertyId);
+            if (!property || !property.auction?.isAuction) {
+                return socket.emit("bidError", "Property not found");
+            }
+
+            const currentBid = property.auction.currentBid ?? 0;
+            const startPrice = property.auction.startPrice ?? 0;
+            const bidAmount = calculateBidAmount(currentBid, startPrice, {
+                propertyId, userId, amount, increment, percent
+            });
+
+            const finalBidAmount = Math.round(bidAmount);
+            if (!finalBidAmount || finalBidAmount <= 0) {
+                return socket.emit("bidError", "Invalid bid amount");
+            }
             const updatedProperty = await Property.findOneAndUpdate({
                 _id: propertyId,
                 "auction.isAuction": true,
                 "auction.endTime": { $gt: new Date() },
                 $or: [
-                    { "auction.currentBid": { $lt: amount } },
+                    { "auction.currentBid": { $lt: finalBidAmount } },
                     {
                         "auction.currentBid": { $exists: false },
-                        "auction.startPrice": { $lt: amount }
+                        "auction.startPrice": { $lt: finalBidAmount }
                     }
                 ]
             },
                 {
-                    $set: { "auction.currentBid": amount },
+                    $set: { "auction.currentBid": finalBidAmount },
                     $inc: { "auction.totalBids": 1 }
                 },
                 { new: true }
@@ -129,7 +169,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             const newBid = await Bid.create({
                 property: propertyId,
                 user: userId,
-                amount
+                amount: finalBidAmount
             });
 
             const populatedBid = await newBid.populate("user", "username");

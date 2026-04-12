@@ -2,7 +2,7 @@ const { io } = require("socket.io-client");
 
 const socket = io("http://localhost:3000");
 
-const PROPERTY_ID = "69dad4f33b3cd7d9a04258e4";
+const PROPERTY_ID = "69db1463d60eba27eb277b8d";
 const USER_ID = "69ce47ca3260b566ba8bb20f";
 
 socket.on("connect", () => {
@@ -14,7 +14,7 @@ socket.on("connect", () => {
         console.log("📌 Sending bid...");
         socket.emit("placeBid", {
             propertyId: PROPERTY_ID,
-            amount: 26000000,
+            increment: 500,
             userId: USER_ID
         });
     }, 3000);
