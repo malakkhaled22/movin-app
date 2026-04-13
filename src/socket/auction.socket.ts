@@ -70,8 +70,8 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const property = await Property.findById(propertyId);
 
-            if (!property || !property.auction?.isAuction) {
-                return socket.emit("auctionError", "Auction not found");
+            if (!property || property.status !== "approved" || !property.auction?.isAuction) {
+                return socket.emit("auctionError", "Auction not available");
             }
 
             const bids = await Bid.find({ property: propertyId })
@@ -116,8 +116,16 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             lastBidTime.set(socket.id, now);
 
             const property = await Property.findById(propertyId);
-            if (!property || !property.auction?.isAuction) {
+            if (!property) {
                 return socket.emit("bidError", "Property not found");
+            }
+
+            if(property.status !== "approved"){
+                return socket.emit("bidError", "Auction not available yet");
+            }
+
+            if(!property.auction?.isAuction){
+                return socket.emit("bidError", "Auction not found");
             }
 
             const currentBid = property.auction.currentBid ?? 0;
@@ -132,6 +140,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             }
             const updatedProperty = await Property.findOneAndUpdate({
                 _id: propertyId,
+                status: "approved",
                 "auction.isAuction": true,
                 "auction.endTime": { $gt: new Date() },
                 $or: [
@@ -200,7 +209,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 export const endAuction = async (io: Server, propertyId: string) => {
     try {
         const property = await Property.findById(propertyId);
-        if (!property || !property.auction?.isAuction) return;
+        if (!property || property.status !== "approved" || !property.auction?.isAuction) return;
         const highestBid = await Bid.findOne({ property: propertyId })
             .sort({ amount: -1 })
             .populate("user", "_id username");
@@ -250,4 +259,3 @@ export const endAuction = async (io: Server, propertyId: string) => {
         console.log("End Auction Error:", error);
     }
 };
-
