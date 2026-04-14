@@ -1,8 +1,8 @@
 const { io } = require("socket.io-client");
 
-const socket = io("https://movin-backend-production.up.railway.app");
+const socket = io("http://localhost:3000");
 
-const PROPERTY_ID = "69dd57a09ec6daef5926c45c";
+const PROPERTY_ID = "69ddb1d3934aabd06d868599";
 const USER_ID = "69ce47ca3620b566ba8bb20f";
 
 socket.on("connect", () => {

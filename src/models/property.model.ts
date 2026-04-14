@@ -19,10 +19,11 @@ export interface IProperty extends Document {
     views: number;
     auction?: {
         isAuction: boolean;
-        startPrice?: number;
+        status: "pending" | "approved" | "rejected" | "expired" | "ended";
+        startPrice: number;
         currentBid?: number;
         startTime: Date;
-        endTime?: Date;
+        endTime: Date;
         totalBids: number;
     };
 }
@@ -78,6 +79,11 @@ const propertySchema = new Schema<IProperty>(
         },
         auction: {
             isAuction: { type: Boolean, default: false },
+            status: {
+                type: String,
+                enum: ["pending", "approved", "rejected", "expired", "ended"],
+                default: "pending"
+            },
             startPrice: { type: Number },
             currentBid: { type: Number },
             startTime: { type: Date },

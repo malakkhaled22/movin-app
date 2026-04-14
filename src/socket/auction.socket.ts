@@ -70,7 +70,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const property = await Property.findById(propertyId);
 
-            if (!property || property.status !== "approved" || !property.auction?.isAuction) {
+            if (!property || property.status !== "approved" || !property.auction?.isAuction || property.auction?.status !== "approved") {
                 return socket.emit("auctionError", "Auction not available");
             }
 
@@ -120,7 +120,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 return socket.emit("bidError", "Property not found");
             }
 
-            if(property.status !== "approved"){
+            if(property.status !== "approved" || property.auction?.status !== "approved"){
                 return socket.emit("bidError", "Auction not available yet");
             }
 
