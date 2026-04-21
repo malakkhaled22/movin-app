@@ -26,7 +26,8 @@ connectDB();
 
 const app = express();
 const allowed = ['https://movin-app.vercel.app',
-                'https://movin-backend.fly.dev'];
+                'https://movin-backend.fly.dev',
+                'https://movin-backend-production.up.railway.app'];
 
 const server = http.createServer(app);
 initSocket(server);
@@ -35,6 +36,7 @@ app.use(cors({
         'http://localhost:4200',
         'https://movin-app.vercel.app',
         'https://movin-backend.fly.dev',
+        'https://movin-backend-production.up.railway.app',
         "*"
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

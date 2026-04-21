@@ -120,3 +120,36 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
         .json({ success: false, message: "Internal Server Error" });
     }
 };
+
+export const createAuctionForProperty = async (req: Request ,res: Response) => {
+    try {
+        const sellerId = (req.user as any)._id;
+        const {propertyId} = req.params;
+        const {startPrice, startTime, endTime} = req.body;
+
+        const property = await Property.findById(propertyId);
+        if(!property) return res.status(404).json({message: "Property not found"});
+        if(property.seller.toString() !== sellerId.toString) return res.status(403).json({message: "Not your property"});
+        if(property.auction?.isAuction) return res.status(400).json({message: "Auction already exists"});
+
+        property.auction = {
+            isAuction: true,
+            status: "pending",
+            startPrice,
+            currentBid: startPrice,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            totalBids: 0,
+        };
+
+        await property.save();
+
+        return res.status(201).json({
+            message: "Auction created successfully (Pending admin approval)",
+            property
+        });
+    } catch (error) {
+        console.error("Create Auction Error", error);
+        return res.status(500).json("Internal Server Error");
+    }
+}

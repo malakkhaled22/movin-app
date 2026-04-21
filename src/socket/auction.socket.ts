@@ -79,7 +79,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 .limit(10)
                 .populate("user", "username");
 
-            if (property.auction.endTime) {
+            if (property.auction.status === "approved" && property.auction.endTime) {
                 scheduleAuctionEnd(io, propertyId, property.auction.endTime);
             }
             const status = getAuctionStatus(property.auction.endTime);
@@ -141,6 +141,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             const updatedProperty = await Property.findOneAndUpdate({
                 _id: propertyId,
                 status: "approved",
+                "auction.status":"approved",
                 "auction.isAuction": true,
                 "auction.endTime": { $gt: new Date() },
                 $or: [
@@ -209,12 +210,13 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 export const endAuction = async (io: Server, propertyId: string) => {
     try {
         const property = await Property.findById(propertyId);
-        if (!property || property.status !== "approved" || !property.auction?.isAuction) return;
+        if (!property || property.status !== "approved" || !property.auction?.isAuction || property.auction?.status !== "approved") return;
         const highestBid = await Bid.findOne({ property: propertyId })
             .sort({ amount: -1 })
             .populate("user", "_id username");
         
         property.auction.isAuction = false;
+        property.auction.status = "ended";
         await property.save();
 
         if (auctionTimers.has(propertyId)) {
