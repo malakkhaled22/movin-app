@@ -7,5 +7,5 @@ const router = express.Router();
 router.get("/auctions/:propertyId", verifyToken, getAuctionDetails);
 
 router.get("/auctions", verifyToken, getAllAuctionProperties);
-router.put("/auction/create", verifyToken, createAuctionForProperty);
+router.put("/auction/create/:propertyId", verifyToken, createAuctionForProperty);
 export default router;
