@@ -128,8 +128,8 @@ export const createAuctionForProperty = async (req: Request ,res: Response) => {
         const {startPrice, startTime, endTime} = req.body;
 
         const property = await Property.findById(propertyId);
-        if(!property) return res.status(404).json({message: "Property not found"});
-        if(property.seller.toString() !== sellerId.toString) return res.status(403).json({message: "Not your property"});
+        if(!property || property.status !== "approved") return res.status(404).json({message: "Property not found"});
+        if(property.seller.toString() !== sellerId.toString()) return res.status(403).json({message: "Not your property"});
         if(property.auction?.isAuction) return res.status(400).json({message: "Auction already exists"});
 
         property.auction = {
