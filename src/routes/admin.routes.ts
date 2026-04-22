@@ -6,7 +6,7 @@ import { approveProperty, rejectProperty, getPendingProperties, getAllProperties
 import { getAdminStats } from "../controllers/admin.users.controller";
 import { adminSearch } from "../controllers/admin.search.controller";
 import { approveAuction, getApprovedAuctions, getPendingAuctions, getRejectedAuctions, rejectAuction } from "../controllers/admin.auctions.controller";
-import { getAllReports, updateReportStatus } from "../controllers/report.controller";
+import { getAllReports, updateReportStatus } from "../controllers/admin.reports.controller";
 export const router = express.Router(); 
 
 router.patch('/users/block/:id' , verifyToken , verifyAdmin , blockUser)
