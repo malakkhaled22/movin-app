@@ -27,13 +27,15 @@ connectDB();
 const app = express();
 const allowed = ['https://movin-app.vercel.app',
                 'https://movin-backend.fly.dev',
-                'https://movin-backend-production.up.railway.app'];
+                'https://movin-backend-production.up.railway.app',
+                'https://admin-dashboard-movin-realestate-ap.vercel.app'];
 
 const server = http.createServer(app);
 initSocket(server);
 app.use(cors({
     origin: [
         'http://localhost:4200',
+        'https://admin-dashboard-movin-realestate-ap.vercel.app',
         'https://movin-app.vercel.app',
         'https://movin-backend.fly.dev',
         'https://movin-backend-production.up.railway.app',
