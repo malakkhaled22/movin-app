@@ -14,7 +14,7 @@ export const getUsersWithPagination = async (
 
   const [users, total] = await Promise.all([
     User.find(filter)
-      .sort({ craetedAt: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
     User.countDocuments(filter),
