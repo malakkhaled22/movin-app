@@ -1,4 +1,5 @@
 import Property from "../models/property.model";
+import Report from "../models/report.model";
 import User from "../models/user.model";
 import { SortOrder } from "mongoose";
 
@@ -49,6 +50,7 @@ export const getAdminStatsService = async () => {
     pendingProperties,
     approvedProperties,
     rejectedProperties,
+    totalReports,
   ] = await Promise.all([
     User.countDocuments(),
     User.countDocuments({ isBuyer: true }),
@@ -57,6 +59,7 @@ export const getAdminStatsService = async () => {
     Property.countDocuments({ status: "pending" }),
     Property.countDocuments({ status: "approved" }),
     Property.countDocuments({ status: "rejected" }),
+    Report.countDocuments(),
   ]);
 
   return {
@@ -71,5 +74,8 @@ export const getAdminStatsService = async () => {
       approved: approvedProperties,
       rejected: rejectedProperties,
     },
+    Reports: {
+      total: totalReports,
+    }
   };
 };

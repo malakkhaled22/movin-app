@@ -10,7 +10,8 @@ export const createReport = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "subject, message, targetType and targetId are required" });
         }
 
-        if (!["User", "Property"].includes(targetType)) {
+        const type = ["user", "property", "User", "Property"];
+        if (!type.includes(targetType)) {
             return res.status(400).json({ message: "Invalid targetType" });
         }
         const report = await Report.create({
