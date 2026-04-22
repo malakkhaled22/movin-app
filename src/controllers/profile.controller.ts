@@ -44,6 +44,41 @@ export const getUserProfile = async (req: Request, res: Response) => {
                 }
             });
         }
+        //Admin Profile
+        if ((user as any).isAdmin) {
+            const totalUsers = await User.countDocuments();
+
+            const totalProperties = await Property.countDocuments();
+            const pendingProperties = await Property.countDocuments({ status: "pending" });
+            const approvedProperties = await Property.countDocuments({ status: "approved" });
+            const rejectedProperties = await Property.countDocuments({ status: "rejected" });
+
+            const pendingAuctions = await Property.countDocuments({
+                status: "approved",
+                "auction.isAuction": true,
+                "auction.status": "pending"
+            });
+
+            const approvedAuctions = await Property.countDocuments({
+                status: "approved",
+                "auction.isAuction": true,
+                "auction.status": "approved"
+            });
+
+            return res.status(200).json({
+                user,
+                stats: {
+                    totalUsers,
+                    totalProperties,
+                    pendingProperties,
+                    approvedProperties,
+                    rejectedProperties,
+                    pendingAuctions,
+                    approvedAuctions
+                }
+            });
+        };
+        return res.status(400).json({message: "Invalid User Role"});
     } catch (error) {
         console.error("Get Profile Error: ", error);
         return res.status(500).json({ message: "Internal Server Error" });
