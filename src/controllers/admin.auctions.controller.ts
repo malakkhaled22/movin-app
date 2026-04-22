@@ -113,13 +113,14 @@ export const rejectAuction = async (req:Request, res:Response)=>{
 
         await property.save();
 
+        if (property.seller && property.seller._id) {
         await createNotificationForUser({
             userId: property.seller._id.toString(),
             title: "Auction Rejected",
             body: `Your auction has been rejected. Reason: ${reason || null}`,
             type: "alert",
         });
-
+    }
         return res.status(200).json({message: "Auction rejected successfully"});
     } catch (error) {
         console.error("Error in Reject Auction: ", error);
