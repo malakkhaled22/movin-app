@@ -6,6 +6,7 @@ import { approveProperty, rejectProperty, getPendingProperties, getAllProperties
 import { getAdminStats } from "../controllers/admin.users.controller";
 import { adminSearch } from "../controllers/admin.search.controller";
 import { approveAuction, getApprovedAuctions, getPendingAuctions, getRejectedAuctions, rejectAuction } from "../controllers/admin.auctions.controller";
+import { getAllReports, updateReportStatus } from "../controllers/report.controller";
 export const router = express.Router(); 
 
 router.patch('/users/block/:id' , verifyToken , verifyAdmin , blockUser)
@@ -21,6 +22,9 @@ router.put("/properties/reject/:id", verifyToken, verifyAdmin, rejectProperty);
 
 router.get("/search", verifyToken, verifyAdmin, adminSearch);
 router.get("/stats", verifyToken, verifyAdmin, getAdminStats);
+
+router.get("/admin/all", verifyToken, verifyAdmin, getAllReports);
+router.patch("/admin/:id/status", verifyToken, verifyAdmin, updateReportStatus);
 
 router.get("/auctions/pending", verifyToken, verifyAdmin, getPendingAuctions);
 router.get("/auctions/approved", verifyToken, verifyAdmin, getApprovedAuctions);
