@@ -5,8 +5,6 @@ import { SortOrder } from "mongoose";
 export const getUsersWithPagination = async (
   page: number,
   limit: number,
-  sortBy: string,
-  order: SortOrder,
   isBlocked?: boolean
 ) => {
   const skip = (page - 1) * limit;
@@ -18,7 +16,7 @@ export const getUsersWithPagination = async (
     User.find(filter)
       .skip(skip)
       .limit(limit)
-      .sort({ [sortBy]: order }),
+      .sort({ craetedAt: -1 }),
     User.countDocuments(filter),
   ]);
 
