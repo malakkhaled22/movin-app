@@ -9,7 +9,8 @@ export const getPendingAuctions = async (req:Request, res:Response)=>{
             status: "approved",
             "auction.isAuction":true,
             "auction.status": "pending",
-        }).populate("seller", "username email");
+        }).populate("seller", "username email")
+        .sort({createdAt: -1});
 
         return res.status(200).json({
             count: auctions.length,
@@ -27,7 +28,8 @@ export const getApprovedAuctions = async (req:Request, res:Response)=>{
             status: "approved",
             "auction.isAuction":true,
             "auction.status": "approved",
-        }).populate("seller", "username email");
+        }).populate("seller", "username email")
+        .sort({createdAt: -1});
 
         return res.status(200).json({
             count: auctions.length,
@@ -45,7 +47,8 @@ export const getRejectedAuctions = async (req:Request, res:Response)=>{
             status: "approved",
             "auction.isAuction":false,
             "auction.status": "rejected",
-        }).populate("seller", "username email");
+        }).populate("seller", "username email")
+        .sort({createdAt: -1});
 
         return res.status(200).json({
             count: auctions.length,
