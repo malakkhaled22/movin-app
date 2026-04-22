@@ -43,7 +43,7 @@ export const getRejectedAuctions = async (req:Request, res:Response)=>{
     try {
         const auctions = await Property.find({
             status: "approved",
-            "auction.isAuction":true,
+            "auction.isAuction":false,
             "auction.status": "rejected",
         }).populate("seller", "username email");
 
