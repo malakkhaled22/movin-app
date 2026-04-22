@@ -5,13 +5,20 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
         console.log("EMAIL_USER:", process.env.EMAIL_USER);
         console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
             },
+            connectionTimeout: 30000,
+            greetingTimeout: 30000,
+            socketTimeout: 30000
         });
 
+        await transporter.verify();
+        console.log("SMTP Connected");
         await transporter.sendMail({
             from: `"Movin App" <${process.env.EMAIL_USER}>`,
             to,
