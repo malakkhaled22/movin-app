@@ -52,8 +52,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getblockedUsers = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = 10;
-  const sortBy = (req.query.sortBy as string) || "createdAt";
-  const order = (req.query.order as string) === "desc" ? -1 : 1;
 
   const result = await getUsersWithPagination(page, limit, true);
   res.status(200).json({
