@@ -6,7 +6,8 @@ import { createNotificationForUser } from "./notifications.service";
 
 export const getPendingPropertiesService = async () => {
     return Property.find({ status: "pending" })
-        .populate("seller", "username email");
+        .populate("seller", "username email")
+        .sort({createdAt: -1});
 };
 
 export const reviewProperty = async (
