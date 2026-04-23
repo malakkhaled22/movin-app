@@ -42,6 +42,7 @@ export const blockOrUnblockUser = async (userId: string, status: boolean) => {
 };
 
 export const getAdminStatsService = async () => {
+
   const [
     totalUsers,
     totalBuyers,
@@ -62,6 +63,73 @@ export const getAdminStatsService = async () => {
     Report.countDocuments(),
   ]);
 
+  const months = 6;
+
+  const userGrowth = await User.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(new Date().setMonth(new Date().getMonth() - months))
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+
+  const propertyGrowth = await Property.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(new Date().setMonth(new Date().getMonth() - months))
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+
+  const labels: string[] = [];
+  const usersData: number[] = [];
+  const propertiesData: number[] = [];
+
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+
+    const monthName = date.toLocaleString("en-US", { month: "short" });
+    labels.push(monthName);
+
+    const userMonth = userGrowth.find(
+      (u) => u._id.year === year && u._id.month === month
+    );
+    const propertyMonth = propertyGrowth.find(
+      (p) => p._id.year === year && p._id.month === month
+    );
+
+    usersData.push(userMonth ? userMonth.count : 0);
+    propertiesData.push(propertyMonth ? propertyMonth.count : 0);
+  }
+
   return {
     users: {
       total: totalUsers,
@@ -74,8 +142,13 @@ export const getAdminStatsService = async () => {
       approved: approvedProperties,
       rejected: rejectedProperties,
     },
-    Reports: {
+    reports: {
       total: totalReports,
+    },
+    growthData: {
+      labels,
+      users: usersData,
+      properties: propertiesData
     }
   };
 };
