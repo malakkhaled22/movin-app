@@ -23,8 +23,8 @@ router.put("/properties/reject/:id", verifyToken, verifyAdmin, rejectProperty);
 router.get("/search", verifyToken, verifyAdmin, adminSearch);
 router.get("/stats", verifyToken, verifyAdmin, getAdminStats);
 
-router.get("/admin/all", verifyToken, verifyAdmin, getAllReports);
-router.patch("/admin/:id/status", verifyToken, verifyAdmin, updateReportStatus);
+router.get("/reports/all", verifyToken, verifyAdmin, getAllReports);
+router.patch("/reports/:id/status", verifyToken, verifyAdmin, updateReportStatus);
 
 router.get("/auctions/pending", verifyToken, verifyAdmin, getPendingAuctions);
 router.get("/auctions/approved", verifyToken, verifyAdmin, getApprovedAuctions);
