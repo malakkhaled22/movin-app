@@ -3,6 +3,7 @@ import Notification from "../models/notifications.model";
 import mongoose from "mongoose";
 import User from "../models/user.model";
 import { createNotificationForUser } from "./notifications.service";
+import { logAdminActivity } from "./adminActivity.service";
 
 export const getPendingPropertiesService = async () => {
     return Property.find({ status: "pending" })
@@ -25,6 +26,24 @@ export const reviewProperty = async (
     property.rejectedReason = status === "rejected" ? reason || "Not specified" : null;
 
     await property.save();
+
+    if(status === "approved"){
+        await logAdminActivity({
+            type: "property",
+            title: "Property approved",
+            description: `${property.type} in ${property.location}`,
+            icon: "home"
+        });
+    };
+
+    if(status === "rejected"){
+        await logAdminActivity({
+            type: "property",
+            title: "Property rejected",
+            description: `${property.type} in ${property.location}`,
+            icon: "home"
+        });
+    };
 
     await Notification.create({
         user: property.seller,

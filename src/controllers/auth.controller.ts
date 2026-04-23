@@ -7,6 +7,7 @@ import { blacklistedToken } from "../models/blacklistToken.model";
 import { generateOTP } from "../utils/generateOTP";
 import { sendEmail } from "../utils/sendEmail";
 import { createNotificationForUser } from "../services/notifications.service";
+import { logAdminActivity } from "../services/adminActivity.service";
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -43,13 +44,19 @@ export const registerUser = async (req: Request, res: Response) => {
         });
         
         await newUser.save();
-
         await sendEmail(
             newUser.email,
             "Verify Your Email",
             `Your verification OTP is ${otp}`
         );
 
+        await logAdminActivity({
+            type: "user",
+            title: "New user registered",
+            description: newUser.email,
+            icon: "user"
+        });
+        
         const token = generateToken({
             _id: String(newUser._id),
             isAdmin: newUser.isAdmin,

@@ -7,6 +7,7 @@ import { getAdminStats } from "../controllers/admin.users.controller";
 import { adminSearch } from "../controllers/admin.search.controller";
 import { approveAuction, getApprovedAuctions, getPendingAuctions, getRejectedAuctions, rejectAuction } from "../controllers/admin.auctions.controller";
 import { getAllReports, updateReportStatus } from "../controllers/admin.reports.controller";
+import { getRecentActivities } from "../controllers/admin.activity.controller";
 export const router = express.Router(); 
 
 router.patch('/users/block/:id' , verifyToken , verifyAdmin , blockUser)
@@ -31,4 +32,6 @@ router.get("/auctions/approved", verifyToken, verifyAdmin, getApprovedAuctions);
 router.get("/auctions/rejected", verifyToken, verifyAdmin, getRejectedAuctions);
 router.put("/auctions/:propertyId/approve", verifyToken, verifyAdmin, approveAuction);
 router.put("/auctions/:propertyId/reject", verifyToken, verifyAdmin, rejectAuction);
+
+router.get("/activities", verifyToken, verifyAdmin, getRecentActivities);
 export default router;

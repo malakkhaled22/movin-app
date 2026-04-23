@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { blockOrUnblockUser, getAdminStatsService, getUsersWithPagination } from "../services/adminUser.service";
 import User from "../models/user.model";
+import { logAdminActivity } from "../services/adminActivity.service";
 
 
 export const blockUser = async (req: Request, res: Response) => {
@@ -15,6 +16,14 @@ export const blockUser = async (req: Request, res: Response) => {
       return res.status(200).json({ message: "user is already blocked" });
 
     await blockOrUnblockUser(userId, true);
+    
+    await logAdminActivity({
+      type: "block",
+      title: "User blocked",
+      description: user.email,
+      icon: "ban"
+    });
+
     res.status(200).json({ message: "user blocked successfully" });
   } catch (error) {
     return res.status(500).json({ message: "internal server error", error });

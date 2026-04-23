@@ -2,6 +2,7 @@ import { createNotificationForUser } from "../services/notifications.service";
 import { getReportsWithPagination } from "../services/report.service";
 import { Request, Response } from "express";
 import Report from "../models/report.model";
+import { logAdminActivity } from "../services/adminActivity.service";
 
 export const getAllReports = async (req: Request, res: Response) => {
     try {
@@ -50,6 +51,13 @@ export const updateReportStatus = async (req: Request, res: Response) => {
         }
         if(status === report.status) return res.status(200).json({message: `Report is already ${status}`});
         if (status === "resolved") {
+
+            await logAdminActivity({
+                type: "report",
+                title: "Report resolved",
+                description: `Report ID: ${report._id}`,
+                icon: "file"
+            });
             await createNotificationForUser({
                 userId: report.reportedBy.toString(),
                 title: "Report Resolved",
