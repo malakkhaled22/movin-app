@@ -21,7 +21,7 @@ export const getReportsWithPagination = async ({
             .populate("reportedBy", "username email")
             .populate({
                 path: "targetId",
-                select: "username email type location",
+                select: "username email seller type location",
             })
             .sort({ createdAt: -1 })
             .skip(skip)

@@ -10,7 +10,7 @@ export const getUsersWithPagination = async (
 ) => {
   const skip = (page - 1) * limit;
 
-  const filter: any = {};
+  const filter: any = {isAdmin: "false"};
   if (isBlocked !== undefined) filter.isBlocked = isBlocked;
 
   const [users, total] = await Promise.all([

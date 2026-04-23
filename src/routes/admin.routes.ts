@@ -24,7 +24,7 @@ router.get("/search", verifyToken, verifyAdmin, adminSearch);
 router.get("/stats", verifyToken, verifyAdmin, getAdminStats);
 
 router.get("/reports/all", verifyToken, verifyAdmin, getAllReports);
-router.patch("/reports/:id/status", verifyToken, verifyAdmin, updateReportStatus);
+router.patch("/reports/:id", verifyToken, verifyAdmin, updateReportStatus);
 
 router.get("/auctions/pending", verifyToken, verifyAdmin, getPendingAuctions);
 router.get("/auctions/approved", verifyToken, verifyAdmin, getApprovedAuctions);

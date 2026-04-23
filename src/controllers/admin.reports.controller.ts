@@ -48,7 +48,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
         if (!report) {
             return res.status(404).json({ message: "Report not found" });
         }
-
+        if(status === report.status) return res.status(200).json({message: `Report is already ${status}`});
         if (status === "resolved") {
             await createNotificationForUser({
                 userId: report.reportedBy.toString(),
