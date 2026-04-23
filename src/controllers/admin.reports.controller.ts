@@ -39,27 +39,29 @@ export const updateReportStatus = async (req: Request, res: Response) => {
         if (!allowedStatus.includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
+        const existingReport = await Report.findById(reportId);
+        
+        if (!existingReport) {
+            return res.status(404).json({ message: "Report not found" });
+        }
+        if (existingReport.status === status) {
+            return res.status(200).json({ message: `Report is already ${status}` });
+        }
 
-        const report = await Report.findByIdAndUpdate(
+        const updatedReport = await Report.findByIdAndUpdate(
             reportId,
             { status },
             { new: true }
         );
-
-        if (!report) {
-            return res.status(404).json({ message: "Report not found" });
-        }
-        if(status === report.status) return res.status(200).json({message: `Report is already ${status}`});
         if (status === "resolved") {
-
             await logAdminActivity({
                 type: "report",
                 title: "Report resolved",
-                description: `Report ID: ${report._id}`,
+                description: `Report ID: ${reportId}`,
                 icon: "file"
             });
             await createNotificationForUser({
-                userId: report.reportedBy.toString(),
+                userId: existingReport.reportedBy.toString(),
                 title: "Report Resolved",
                 body: "Your report has been reviewed and resolved by the admin.",
                 type: "alert",
@@ -68,7 +70,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             message: "Report status updated",
-            report,
+            updatedReport,
         });
     } catch (error) {
         console.error(error);
