@@ -5,15 +5,26 @@ import { createNotificationForUser } from "../services/notifications.service";
 
 export const getPendingAuctions = async (req:Request, res:Response)=>{
     try {
-        const auctions = await Property.find({
+        const page = parseInt(req.query.page as string) || 1;
+        const limit =  parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+        const filter = {
             status: "approved",
-            "auction.isAuction":true,
-            "auction.status": "pending",
-        }).populate("seller", "username email")
-        .sort({createdAt: -1});
+            "auction.isAuction": true,
+            "auction.status": "pending"
+        }
+        const auctions = await Property.find(filter)
+        .populate("seller", "username email")
+        .sort({createdAt: -1})
+        .skip(skip)
+        .limit(limit);
 
+        const total = await Property.countDocuments(filter);
         return res.status(200).json({
-            count: auctions.length,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
             auctions,
         });
     } catch (error) {
@@ -24,15 +35,28 @@ export const getPendingAuctions = async (req:Request, res:Response)=>{
 
 export const getApprovedAuctions = async (req:Request, res:Response)=>{
     try {
-        const auctions = await Property.find({
+        const page = parseInt(req.query.page as string) || 1;
+        const limit =  parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+        const filter = {
             status: "approved",
-            "auction.isAuction":true,
-            "auction.status": "approved",
-        }).populate("seller", "username email")
-        .sort({createdAt: -1});
+            "auction.isAuction": true,
+            "auction.status": "approved"
+        }
+
+        const auctions = await Property.find(filter).
+        populate("seller", "username email")
+        .sort({createdAt: -1})
+        .skip(skip)
+        .limit(limit);
+
+        const total = await Property.countDocuments(filter);
 
         return res.status(200).json({
-            count: auctions.length,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
             auctions,
         });
     } catch (error) {
@@ -43,15 +67,27 @@ export const getApprovedAuctions = async (req:Request, res:Response)=>{
 
 export const getRejectedAuctions = async (req:Request, res:Response)=>{
     try {
-        const auctions = await Property.find({
+        const page = parseInt(req.query.page as string) || 1;
+        const limit =  parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+        const filter = {
             status: "approved",
-            "auction.isAuction":false,
-            "auction.status": "rejected",
-        }).populate("seller", "username email")
-        .sort({createdAt: -1});
+            "auction.isAuction": false,
+            "auction.status": "rejected"
+        }
 
+        const auctions = await Property.find(filter)
+        .populate("seller", "username email")
+        .sort({createdAt: -1})
+        .skip(skip)
+        .limit(limit);
+
+        const total = await Property.countDocuments(filter);
         return res.status(200).json({
-            count: auctions.length,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total/limit),
             auctions,
         });
     } catch (error) {
