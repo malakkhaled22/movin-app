@@ -2,6 +2,7 @@ import express from "express";
 import {
   createProperty,
   deleteProperty,
+  filterProperties,
   getAllProperties,
   getOneProperty,
   getPropertyByType,
@@ -22,4 +23,5 @@ router.get("/properties/getOne/:id", verifyToken, getOneProperty);
 router.get("/properties/search", verifyToken, searchPropertyLocation);
 router.get("/properties/recent-properties", verifyToken, getRecentProperties);
 router.get("/properties/listing-type", verifyToken, getPropertyByType);
+router.get("/properties/filter", verifyToken, filterProperties);
 export default router;

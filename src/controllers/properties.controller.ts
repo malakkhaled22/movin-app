@@ -201,6 +201,7 @@ export const getOneProperty = async (req: Request, res: Response) => {
 export const filterProperties = async (req: Request, res: Response) => {
   try {
     const {
+      location,
       type,
       minPrice,
       maxPrice,
@@ -217,6 +218,9 @@ export const filterProperties = async (req: Request, res: Response) => {
 
     let filter: any = { status: "approved" };
 
+    if (location){
+      filter.location = {$regex: location, $options: "i" };
+    }
     
     if (minPrice || maxPrice) {
       filter.price = {};
@@ -258,7 +262,6 @@ export const filterProperties = async (req: Request, res: Response) => {
     if (sort === "newest")
       sortOption = { createdAt: -1 };
 
-    console.log(filter);
     const properties = await Property.find(filter)
       .populate("seller", "username email")
       .sort(sortOption)
@@ -267,12 +270,22 @@ export const filterProperties = async (req: Request, res: Response) => {
     
     const total = await Property.countDocuments(filter);
 
+    let locationTotalCount = null;
+
+    if(location){
+      locationTotalCount = await Property.countDocuments({
+        status: "approved",
+        location: {$regex: location, $options: "i" }
+      });
+    }
+
     return res.status(200).json({
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
       properties,
+      locationTotalCount,
     });
   } catch (error) {
     console.error("Filter properties Error", error);
