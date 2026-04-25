@@ -42,7 +42,6 @@ export const chooseRole = async (req: Request, res: Response) => {
     }
 };
 
-
 export const switchRole = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user._id; // from token

@@ -1,7 +1,6 @@
 import Property from "../models/property.model";
 import Report from "../models/report.model";
 import User from "../models/user.model";
-import { SortOrder } from "mongoose";
 
 export const getUsersWithPagination = async (
   page: number,

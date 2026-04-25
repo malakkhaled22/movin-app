@@ -152,4 +152,4 @@ export const createAuctionForProperty = async (req: Request ,res: Response) => {
         console.error("Create Auction Error", error);
         return res.status(500).json("Internal Server Error");
     }
-}
+};

@@ -6,6 +6,7 @@ import {
   getAllProperties,
   getOneProperty,
   getPropertyByType,
+  getPropertyDetailsForBuyer,
   getRecentProperties,
   searchPropertyLocation,
   updateProperty
@@ -20,8 +21,11 @@ router.patch("/properties/:id", verifyToken, upload.array("images", 10), updateP
 router.delete("/properties/:id", verifyToken, deleteProperty);
 router.get("/properties/getAll", verifyToken, getAllProperties);
 router.get("/properties/getOne/:id", verifyToken, getOneProperty);
+
 router.get("/properties/search", verifyToken, searchPropertyLocation);
 router.get("/properties/recent-properties", verifyToken, getRecentProperties);
 router.get("/properties/listing-type", verifyToken, getPropertyByType);
 router.get("/properties/filter", verifyToken, filterProperties);
+
+router.get("/properties/:id", verifyToken, getPropertyDetailsForBuyer);
 export default router;
