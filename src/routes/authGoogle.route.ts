@@ -19,7 +19,7 @@ router.get(
         console.log("USER:", req.user);
         const {accessToken, refreshToken} = req.user;
         return res.redirect(
-            `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+            `movin://auth-success?accessToken=${req.user.accessToken}&refreshToken=${req.user.refreshToken}`
         );
     }
 );
