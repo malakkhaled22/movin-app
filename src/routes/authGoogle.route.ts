@@ -17,10 +17,14 @@ router.get(
     }),
     async (req: any, res) => {
         console.log("USER:", req.user);
-        const {accessToken, refreshToken} = req.user;
-        return res.redirect(
-            `movin://auth-success?accessToken=${req.user.accessToken}&refreshToken=${req.user.refreshToken}`
-        );
+        console.log("ACCESS: ", req.user.accessToken);
+        console.log("REFRESH: ", req.user.refreshToken);
+        const accessToken = req.user.accessToken;
+        const refreshToken = req.user.refreshToken;
+        return res.json({accessToken, refreshToken});
+        //return res.redirect(
+          //  `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+        //);
     }
 );
 
