@@ -16,10 +16,10 @@ router.get(
         session: false,
     }),
     async (req: any, res) => {
-        console.log("CALL BACK HIT");
         console.log("USER:", req.user);
+        const {accessToken, refreshToken} = req.user;
         return res.redirect(
-            `movin://auth-success?token=${req.user.token}`
+            `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
         );
     }
 );

@@ -30,14 +30,15 @@ passport.use(
                     });
                 }
 
-                const token = generateToken({
+                const { accessToken, refreshToken } = generateToken({
                     _id: String(user._id),
                     isAdmin: user.isAdmin,
                     isSeller: user.isSeller,
                     isBuyer: user.isBuyer,
                 });
-                
-                return done(null, { user, token });
+                user.refreshToken = refreshToken;
+                await user.save();
+                return done(null, { user, accessToken, refreshToken });
             } catch (error) {
                 return done(error, false);
             }
