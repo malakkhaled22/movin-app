@@ -7,13 +7,20 @@ interface Payload {
     isAdmin?: boolean;
 }
 
-export const generateToken = (payload: Payload): string => {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
+export const generateToken = (payload: Payload) => {
+    const accessSecret = process.env.JWT_SECRET;
+    const refreshSecret = process.env.REFRESH_SECRET;
+    if (!accessSecret) {
         throw new Error("JWT_SECRET is not defined in environment variables");
     }
-
-    return jwt.sign(payload, secret, {
+    if(!refreshSecret){
+        throw new Error("REFRESH_SECRET is not defined in environment variables");
+    }
+    const accessToken = jwt.sign(payload, accessSecret, {
         expiresIn: "1h"
     });
+    const refreshToken = jwt.sign(payload, refreshSecret, {
+        expiresIn: "15d"
+    });
+    return {accessToken, refreshToken};
 };

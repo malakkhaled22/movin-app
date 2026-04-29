@@ -3,7 +3,6 @@ import { User } from "../models/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken";
-import { blacklistedToken } from "../models/blacklistToken.model";
 import { generateOTP } from "../utils/generateOTP";
 import { sendEmail } from "../utils/sendEmail";
 import { createNotificationForUser } from "../services/notifications.service";
@@ -56,23 +55,9 @@ export const registerUser = async (req: Request, res: Response) => {
             description: newUser.email,
             icon: "user"
         });
-        
-        const token = generateToken({
-            _id: String(newUser._id),
-            isAdmin: newUser.isAdmin,
-            isSeller: newUser.isSeller,
-            isBuyer: newUser.isBuyer,
-        });
 
         res.status(201).json({
-            message: "User registered successfully",
-            token,
-            user: {
-                id: newUser._id,
-                name: newUser.username,
-                email: newUser.email,
-                phone: newUser.phone
-            }
+            message: "User registered successfully, Please verify your email"
         });
         console.log(`✅ OTP for ${newUser.email}: ${otp}`);
     } catch (error) {
@@ -95,6 +80,14 @@ export const verifyEmailOtp = async (req: Request, res: Response) => {
     user.otpCode = undefined;
     user.otpExpire = undefined;
 
+    const { accessToken, refreshToken } = generateToken({
+        _id: user.id.toString(),
+        isAdmin: user.isAdmin,
+        isSeller: user.isSeller,
+        isBuyer: user.isBuyer,
+    });
+
+    user.refreshToken = refreshToken;
     await user.save();
 
     await createNotificationForUser({
@@ -104,7 +97,19 @@ export const verifyEmailOtp = async (req: Request, res: Response) => {
         type: "alert",
     });
 
-    res.status(200).json({ message: "Email verified successfully" });
+    res.status(200).json({ message: "Email verified successfully",
+        accessToken,
+        refreshToken,
+        user: {
+                id: user._id,
+                name: user.username,
+                email: user.email,
+                phone: user.phone,
+                isAdmin: user.isAdmin,
+                isSeller: user.isSeller,
+                isBuyer: user.isBuyer,
+            }
+    });
 };
 
 export const loginUser = async (req: Request, res: Response) => {
@@ -134,16 +139,20 @@ export const loginUser = async (req: Request, res: Response) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = generateToken({
+        const { accessToken, refreshToken } = generateToken({
             _id: String(user._id),
             isAdmin: user.isAdmin,
             isSeller: user.isSeller,
             isBuyer: user.isBuyer,
         });
 
+        user.refreshToken = refreshToken;
+        await user.save();
+
         res.status(200).json({
             message: "Login successful",
-            token,
+            accessToken,
+            refreshToken,
             user: {
                 _id: user._id,
                 name: user.username,
@@ -160,19 +169,40 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 };
 
+export const refreshToken = async (req: Request, res: Response) => {
+    try {
+        const { refreshToken } = req.body;
+        if(!refreshToken) return res.status(401).json({ message: "No refresh token found"});
+
+        const decoded: any = jwt.verify(refreshToken, process.env.REFRESH_SECRET!);
+
+        const user = await User.findById(decoded._id);
+        if(!user) return res.status(401).json({ message: "User not found" });
+
+        if(user.refreshToken !== refreshToken) 
+            return res.status(401).json({ message: "Invalid refresh token"});
+
+        const newAccessToken = generateToken({
+            _id: user.id.toString(),
+            isAdmin: user.isAdmin,
+            isSeller: user.isSeller,
+            isBuyer: user.isBuyer,
+        });
+        return res.status(200).json({ accessToken: newAccessToken });
+    } catch (error) {
+        return res.status(500).json({message: "Refresh token expired or invalid"});
+    }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) {
-            return res.status(400).json({ message: "No token provided" });
-        }
+        const userId = (req.user as any)._id;
+        const user= await User.findById(userId);
+        if(!user) return res.status(404).json({ message: "User not found" });
+        
+        user.refreshToken = null;
+        await user.save();
 
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-
-        await blacklistedToken.create({
-            token,
-            expiredAt: new Date(decoded.exp * 1000),
-        });
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed", error });

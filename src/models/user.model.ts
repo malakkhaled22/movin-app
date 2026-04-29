@@ -21,6 +21,7 @@ export interface IUser extends Document {
     otpCode?: string;
     otpExpire?: Date;
     isVerified?: boolean;
+    refreshToken?: string | null;
     passwordResetVerification?: boolean;
     favorites?: Schema.Types.ObjectId[];
     searchHistory?: { location: string, count: number }[];
@@ -73,6 +74,7 @@ const userSchema = new Schema<IUser>(
         otpCode: { type: String },
         otpExpire: { type: Date },
         isVerified: { type: Boolean, default: false },
+        refreshToken: {type: String, default: null },
         passwordResetVerification: { type: Boolean, default: null },
         isGoogleAuth: { type: Boolean, default: false },
         favorites: [{

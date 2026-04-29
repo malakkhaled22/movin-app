@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken"; 
 import { Request, Response, NextFunction } from "express";
-import { blacklistedToken } from "../models/blacklistToken.model";
 
 export interface JwtPayload{
     _id: string;
@@ -22,10 +21,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         
         if (!JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined in .env file");
-        }
-        const blacklisted = await blacklistedToken.findOne({ token });
-        if (blacklisted) {
-            return res.status(401).json({ message: "Token expired 'Logout' "});
         }
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         (req as any).user = decoded;
