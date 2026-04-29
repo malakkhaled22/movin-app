@@ -21,10 +21,9 @@ router.get(
         console.log("REFRESH: ", req.user.refreshToken);
         const accessToken = req.user.accessToken;
         const refreshToken = req.user.refreshToken;
-        return res.json({accessToken, refreshToken});
-        //return res.redirect(
-          //  `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
-        //);
+        return res.redirect(
+            `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+        );
     }
 );
 
