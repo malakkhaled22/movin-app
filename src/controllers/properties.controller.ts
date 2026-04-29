@@ -382,3 +382,25 @@ export const getPropertyDetailsForBuyer = async (req: Request, res: Response) =>
     return res.status(500).json("Internal Server Error");
   }
 };
+
+export const getSellerMostViewedProps = async (req: Request, res: Response) => {
+  try {
+    const sellerId = (req.user as any)._id;
+
+    const properties = await Property.find({
+      seller: sellerId,
+      status: "approved",
+    })
+    .sort({ views: -1 })
+    .limit(5)
+    .select("location type price views images createdAt");
+
+    return res.status(200).json({
+      count: properties.length,
+      properties
+    });
+  } catch (error) {
+    console.error("Error in get seller most viewed properties", error);
+    return res.status(500).json({message: "Internal Server Error"});
+  }
+};

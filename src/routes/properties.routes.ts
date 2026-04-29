@@ -8,6 +8,7 @@ import {
   getPropertyByType,
   getPropertyDetailsForBuyer,
   getRecentProperties,
+  getSellerMostViewedProps,
   searchPropertyLocation,
   updateProperty
 } from "../controllers/properties.controller";
@@ -27,5 +28,8 @@ router.get("/properties/recent-properties", verifyToken, getRecentProperties);
 router.get("/properties/listing-type", verifyToken, getPropertyByType);
 router.get("/properties/filter", verifyToken, filterProperties);
 
+router.get("/properties/most-viewed", verifyToken, getSellerMostViewedProps);
+
 router.get("/properties/:id", verifyToken, getPropertyDetailsForBuyer);
+
 export default router;
