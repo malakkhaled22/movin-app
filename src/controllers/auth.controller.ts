@@ -17,7 +17,7 @@ export const registerUser = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "All fields are required!" });
         }
         const existingUser = await User.findOne({ email });
-        if (existingUser && existingUser.isVerified == true) {
+        if (existingUser && existingUser.isVerified) {
             return res.status(400).json({ message: "Email already exists" });
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -57,7 +57,8 @@ export const registerUser = async (req: Request, res: Response) => {
         });
 
         res.status(201).json({
-            message: "User registered successfully, Please verify your email"
+            message: "User registered successfully, Please verify your email",
+            user: newUser.email,
         });
         console.log(`✅ OTP for ${newUser.email}: ${otp}`);
     } catch (error) {

@@ -372,13 +372,15 @@ export const getPropertyDetailsForBuyer = async (req: Request, res: Response) =>
       {$inc: { views: 1 } },
       { new: true }
     ).populate("seller", "username email phone location");
+    
+    if(!property) return res.status(404).json({message: "Property not found"});
 
     await PropertyView.create({
       property: propertyId,
-      seller: property?.seller,
+      seller: (property?.seller as any)?._id,
       viewer: userId || null,
     }); 
-    
+
     if(!property) return res.status(404).json({message: "Property not found"});
 
     return res.status(200).json({
