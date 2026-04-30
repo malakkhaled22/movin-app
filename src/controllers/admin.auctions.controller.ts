@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import Property from "../models/property.model";
 import { createNotificationForUser } from "../services/notifications.service";
+import { logAdminActivity } from "../services/adminActivity.service";
 
 
 export const getPendingAuctions = async (req:Request, res:Response)=>{
@@ -131,6 +132,13 @@ export const approveAuction = async (req: Request, res: Response)=>{
             type: "alert",
         });
 
+        await logAdminActivity({
+            type: "auction",
+            title: "Auction approved",
+            description: `${property.type} in ${property.location}`,
+            icon: "auction"
+        });
+
         return res.status(200).json({message: "Auction approved successfully"});
     } catch (error) {
         console.error("Error in Approve Auction: ", error);
@@ -158,6 +166,12 @@ export const rejectAuction = async (req:Request, res:Response)=>{
             title: "Auction Rejected",
             body: `Your auction has been rejected. Reason: ${reason || null}`,
             type: "alert",
+        });
+        await logAdminActivity({
+            type: "auction",
+            title: "Auction rejected",
+            description: `${property.type} in ${property.location}`,
+            icon: "auction"
         });
     }
         return res.status(200).json({message: "Auction rejected successfully"});
