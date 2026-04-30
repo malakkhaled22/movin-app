@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
 import PropertyView from "../models/propertyView.model";
+import mongoose from "mongoose";
 
 export const getSellerViewsChart = async (req: Request, res: Response) => {
     try {
-        const sellerId = (req.user as any)._id;
+        const sellerId = new mongoose.Types.ObjectId((req.user as any)._id);
+        
         const now = new Date();
         const startDate = new Date();
-        startDate.setMonth(now.getMonth() - 5);
-        startDate.setDate(1);
         startDate.setHours(0, 0, 0, 0);
+        startDate.setDate(1); 
+        startDate.setMonth(now.getMonth() - 5);
 
-        const viewDate = await PropertyView.aggregate([
+        const viewData = await PropertyView.aggregate([
             {
                 $match: {
                     seller: sellerId,
@@ -26,31 +28,32 @@ export const getSellerViewsChart = async (req: Request, res: Response) => {
                     totalViews: { $sum: 1 },
                 },
             },
-            { $sort: {"_id.year": 1, "_id.month": 1 } },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]);
 
-        const months: { label: string; totalViews: number }[] =[];
+        const labels: string[] = [];
+        const data: number[] = [];
 
         for (let i = 5; i >= 0; i--) {
             const d = new Date();
+            d.setDate(1);
             d.setMonth(now.getMonth() - i);
 
             const month = d.getMonth() + 1;
             const year = d.getFullYear();
 
-            const found = viewDate.find(
+            const found = viewData.find(
                 (x) => x._id.month === month && x._id.year === year
             );
 
-            months.push({
-                label: d.toLocaleString("en-US", { month: "short"}),
-                totalViews: found ? found.totalViews : 0,
-            });
+            labels.push(d.toLocaleString("en-US", { month: "short" }));
+            data.push(found ? found.totalViews : 0);
         }
+
         return res.status(200).json({
             chart: {
-                labels: months.map((m) => m.label),
-                data: months.map((m) => m.totalViews)
+                labels,
+                data
             }
         });
     } catch (error) {
