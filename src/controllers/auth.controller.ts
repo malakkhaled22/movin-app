@@ -155,7 +155,7 @@ export const loginUser = async (req: Request, res: Response) => {
             accessToken,
             refreshToken,
             user: {
-                _id: user._id,
+                id: user._id,
                 name: user.username,
                 email: user.email,
                 phone: user.phone,
