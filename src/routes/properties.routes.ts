@@ -14,6 +14,7 @@ import {
 } from "../controllers/properties.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/uploadProperty.middleware";
+import { getSellerViewsChart } from "../controllers/propertyviewChart.controller";
 
 const router = express.Router();
 
@@ -29,6 +30,8 @@ router.get("/properties/listing-type", verifyToken, getPropertyByType);
 router.get("/properties/filter", verifyToken, filterProperties);
 
 router.get("/properties/most-viewed", verifyToken, getSellerMostViewedProps);
+
+router.get("/views-chart", verifyToken, getSellerViewsChart);
 
 router.get("/properties/:id", verifyToken, getPropertyDetailsForBuyer);
 

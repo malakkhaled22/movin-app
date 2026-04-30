@@ -2,6 +2,7 @@ import { Property } from "../models/property.model";
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import cloudinary from "../config/cloudinary";
+import PropertyView from "../models/propertyView.model";
 
 export const createProperty = async (req: Request, res: Response) => {
   try {
@@ -364,6 +365,7 @@ export const getPropertyByType = async (req: Request, res: Response) => {
 export const getPropertyDetailsForBuyer = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params["id"];
+    const userId = (req.user as any)._id;
 
     const property = await Property.findOneAndUpdate(
       {_id: propertyId, status: "approved" },
@@ -371,6 +373,12 @@ export const getPropertyDetailsForBuyer = async (req: Request, res: Response) =>
       { new: true }
     ).populate("seller", "username email phone location");
 
+    await PropertyView.create({
+      property: propertyId,
+      seller: property?.seller,
+      viewer: userId || null,
+    }); 
+    
     if(!property) return res.status(404).json({message: "Property not found"});
 
     return res.status(200).json({

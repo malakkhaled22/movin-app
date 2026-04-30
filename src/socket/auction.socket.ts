@@ -48,7 +48,8 @@ const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
     }, timeLeft);
 
     auctionTimers.set(propertyId, timer);
-}
+};
+
 const getAuctionStatus = (endTime?: Date) => {
     if (!endTime) return "ended";
     const now = new Date();
