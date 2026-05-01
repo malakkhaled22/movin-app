@@ -56,7 +56,9 @@ const getAuctionStatus = (endTime?: Date) => {
     const diff = endTime.getTime() - now.getTime();
 
     if (diff <= 0) return "ended";
-    if (diff <= 60000) return "endingSoon";
+    
+    const TWO_HOUR = 120 * 60 * 1000;
+    if (diff <= TWO_HOUR) return "endingSoon";
 
     return "live";
 };

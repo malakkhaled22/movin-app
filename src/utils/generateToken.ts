@@ -17,10 +17,10 @@ export const generateToken = (payload: Payload) => {
         throw new Error("REFRESH_SECRET is not defined in environment variables");
     }
     const accessToken = jwt.sign(payload, accessSecret, {
-        expiresIn: "1h"
+        expiresIn: "15min"
     });
     const refreshToken = jwt.sign(payload, refreshSecret, {
-        expiresIn: "15d"
+        expiresIn: "10d"
     });
     return {accessToken, refreshToken};
 };
