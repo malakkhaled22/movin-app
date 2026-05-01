@@ -38,4 +38,5 @@ export const isSeller = (req: Request, res: Response, next: NextFunction) => {
     if (!user || !user.isSeller) {
         return res.status(403).json({ error: "Access denied. Seller account required only." });
     }
+    next();
 }

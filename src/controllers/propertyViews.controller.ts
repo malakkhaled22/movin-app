@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import PropertyView from "../models/propertyView.model";
 import mongoose from "mongoose";
+import Property from "../models/property.model";
+import User from "../models/user.model";
 
 export const getSellerViewsChart = async (req: Request, res: Response) => {
     try {
@@ -141,5 +143,55 @@ export const getBuyerViewHistory = async (req: Request, res: Response) => {
     } catch (error) {
     console.error("Error in getBuyerViewHistory:", error);
     return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const getSellerDashboardStats = async (req: Request, res: Response) => {
+    try {
+        const sellerId = new mongoose.Types.ObjectId((req.user as any)._id);
+
+        const activeListings = await Property.countDocuments({
+            seller: sellerId,
+            status: "approved",
+        });
+
+        const viewsResult = await Property.aggregate([
+            {
+                $match: {
+                seller: sellerId,
+                status: "approved",
+                },
+            },
+            {
+                $group: {
+                _id: null,
+                totalViews: { $sum: "$views" },
+                },
+            },
+        ]);
+
+    const totalViews = viewsResult.length > 0 ? viewsResult[0].totalViews : 0;
+
+        const sellerPropertiesIds = await Property.find({ seller: sellerId }).distinct("_id");
+        const favoritesCount = await User.countDocuments({
+            favorites: { $in: sellerPropertiesIds },
+        });
+
+        const auctionListings = await Property.countDocuments({
+            seller: sellerId,
+            status: "approved",
+            "auction.isAuction": true,
+            "auction.status": "approved",
+        });
+
+        return res.status(200).json({
+            activeListings,
+            totalViews,
+            totalFavorites: favoritesCount,
+            auctionListings,
+        });
+    } catch (error) {
+        console.error("Error in Get Seller Dashboard Stats: ", error);
+        return res.status(500).json("Internal Server Error");
     }
 };
