@@ -2,31 +2,62 @@ import Property from "../models/property.model";
 import Report from "../models/report.model";
 import User from "../models/user.model";
 
-export const getUsersWithPagination = async (
-  page: number,
-  limit: number,
-  isBlocked?: boolean
-) => {
+export const getUsersWithPagination = async (page: number, limit: number, isBlocked?: boolean) => {
   const skip = (page - 1) * limit;
-
-  const filter: any = {isAdmin: "false"};
+  const filter: any = { isAdmin: false };
   if (isBlocked !== undefined) filter.isBlocked = isBlocked;
 
-  const [users, total] = await Promise.all([
-    User.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
-    User.countDocuments(filter),
+  const users = await User.aggregate([
+    { $match: filter },
+    {
+      $lookup: {
+        from: "properties",
+        localField: "_id",
+        foreignField: "seller",
+        as: "userProperties"
+      }
+    },
+    {
+      $lookup: {
+        from: "reports",
+        let: { 
+          userId: "$_id", 
+          propertyIds: "$userProperties._id"
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $or: [
+                  { $and: [
+                    { $eq: ["$targetType", "User"] },
+                    { $eq: ["$targetId", "$$userId"] }
+                  ]},
+                  { $and: [
+                    { $eq: ["$targetType", "Property"] },
+                    { $in: ["$targetId", "$$propertyIds"] }
+                  ]}
+                ]
+              }
+            }
+          }
+        ],
+        as: "allRelevantReports"
+      }
+    },
+    {
+      $addFields: {
+        reportsCount: { $size: "$allRelevantReports" }
+      }
+    },
+    { $project: { userProperties: 0, allRelevantReports: 0 } },
+    { $sort: { createdAt: -1 } },
+    { $skip: skip },
+    { $limit: limit }
   ]);
 
-  return {
-    users,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
+  const total = await User.countDocuments(filter);
+  return { users, total, page, limit, totalPages: Math.ceil(total / limit) };
 };
 
 export const blockOrUnblockUser = async (userId: string, status: boolean) => {

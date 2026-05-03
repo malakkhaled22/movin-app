@@ -93,14 +93,61 @@ export const getAllPropertiesAdminService = async (
     const filter: any = {};
     if (status) filter.status = status;
 
-    const [properties, total] = await Promise.all([
-        Property.find(filter)
-            .populate("seller", "username email")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit),
-        Property.countDocuments(filter),
+    const properties = await Property.aggregate([
+        { $match: filter },
+        {
+            $lookup: {
+                from: "users",
+                localField: "seller",
+                foreignField: "_id",
+                as: "sellerDetails"
+            }
+        },
+        { $unwind: "$sellerDetails" },
+        {
+            $lookup: {
+                from: "reports",
+                let: { propertyId: "$_id", sellerId: "$sellerDetails._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $and: [
+                                        { $eq: ["$targetType", "Property"] },
+                                        { $eq: ["$targetId", "$$propertyId"] }
+                                    ]},
+                                    { $and: [
+                                        { $eq: ["$targetType", "User"] },
+                                        { $eq: ["$targetId", "$$sellerId"] }
+                                    ]}
+                                ]
+                            }
+                        }
+                    }
+                ],
+                as: "propertyAndSellerReports"
+            }
+        },
+        {
+            $addFields: {
+                seller: {
+                    _id: "$sellerDetails._id",
+                    username: "$sellerDetails.username",
+                    email: "$sellerDetails.email",
+                    isBlocked: "$sellerDetails.isBlocked",
+                    reportsCount: { $size: "$propertyAndSellerReports" }
+                }
+            }
+        },
+
+        { $project: { sellerDetails: 0, propertyAndSellerReports: 0 } },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
     ]);
+
+    const total = await Property.countDocuments(filter);
 
     return {
         properties,

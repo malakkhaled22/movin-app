@@ -49,13 +49,18 @@ export const unBlockUser = async (req: Request, res: Response) => {
 };
 
 export const getAllUsers = async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = 10;
-  const result = await getUsersWithPagination(page, limit);
-  res.status(200).json({
-    message: "all users fetched successfully",
-    result,
-  });
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = 10;
+    const result = await getUsersWithPagination(page, limit);
+    
+    res.status(200).json({
+      message: "all users fetched successfully",
+      ...result,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error });
+  }
 };
 
 export const getblockedUsers = async (req: Request, res: Response) => {
