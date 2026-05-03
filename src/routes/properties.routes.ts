@@ -14,7 +14,7 @@ import {
 } from "../controllers/properties.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/uploadProperty.middleware";
-import { getBuyerViewHistory, getSellerDashboardStats, getSellerViewsChart } from "../controllers/propertyViews.controller";
+import { clearBuyerViewHistory, getBuyerViewHistory, getSellerDashboardStats, getSellerViewsChart } from "../controllers/propertyViews.controller";
 import { isBuyer, isSeller } from "../middlewares/role.guard.middleware";
 
 const router = express.Router();
@@ -34,6 +34,7 @@ router.get("/properties/most-viewed", verifyToken, isSeller, getSellerMostViewed
 router.get("/views-chart", verifyToken, isSeller, getSellerViewsChart);
 router.get("/dashboard-stats", verifyToken, isSeller, getSellerDashboardStats);
 
+router.delete("/view-history/clear", verifyToken, isBuyer, clearBuyerViewHistory);
 router.get("/view-history", verifyToken, isBuyer, getBuyerViewHistory);
 router.get("/properties/:id", verifyToken, isBuyer, getPropertyDetailsForBuyer);
 

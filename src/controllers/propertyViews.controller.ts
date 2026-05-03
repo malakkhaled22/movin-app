@@ -146,6 +146,24 @@ export const getBuyerViewHistory = async (req: Request, res: Response) => {
     }
 };
 
+export const clearBuyerViewHistory = async (req: Request, res: Response) => {
+    try {
+        const buyerId = new mongoose.Types.ObjectId((req.user as any)._id);
+        const result = await PropertyView.deleteMany({
+            viewer: buyerId
+        });
+
+        return res.status(200).json({
+            message: "View history cleared successfully",
+            deletedCount: result.deletedCount,
+        });
+
+    } catch (error) {
+        console.error("Error in clearBuyerViewHistory:", error);
+        return res.status(500).json({ message: "Internal Server Error"});
+    }
+};
+
 export const getSellerDashboardStats = async (req: Request, res: Response) => {
     try {
         const sellerId = new mongoose.Types.ObjectId((req.user as any)._id);
