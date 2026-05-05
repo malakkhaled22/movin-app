@@ -48,6 +48,7 @@ const userSchema = new Schema<IUser>(
             required: function (): boolean { return !this.isGoogleAuth; },
             validate: {
                 validator: function (value: number) {
+                    if(value === null || value === undefined) return true;
                     return /^[0-9]{10,15}$/.test(value.toString());
                 },
                 message: "Phone number must be between 10-15 digits"
