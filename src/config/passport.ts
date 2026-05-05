@@ -18,27 +18,46 @@ passport.use(
             try {
                 const email = profile.emails?.[0].value;
                 const name = profile.displayName;
+                if(!email)
+                    return done(new Error("Google email not found"), false);
 
                 let user = await User.findOne({ email });
 
                 if (!user) {
+                    console.log("NEW GOOGLE USER REGISTERED: ", email);
                     user = await User.create({
                         username: name,
                         email,
+                        phone: null,
+                        location: "",
+                        bio: "",
+                        favorites: [],
+                        isAdmin: false,
+                        isBuyer: false,
+                        isSeller: false,
+                        canSwitchRole: true,
                         isGoogleAuth: true,
                         isVerified: true,
                     });
+                }else{
+                    console.log("GOOGLE USER LOGGED IN: ", email);
                 }
+                const fullUser = await User.findById(user._id).select("-password");
+                if(!fullUser) return done(new Error("User not found after creation"), false);
 
                 const { accessToken, refreshToken } = generateToken({
-                    _id: String(user._id),
-                    isAdmin: user.isAdmin,
-                    isSeller: user.isSeller,
-                    isBuyer: user.isBuyer,
+                    _id: String(fullUser._id),
+                    isAdmin: fullUser.isAdmin,
+                    isSeller: fullUser.isSeller,
+                    isBuyer: fullUser.isBuyer,
                 });
-                user.refreshToken = refreshToken;
+                fullUser.refreshToken = refreshToken;
                 await user.save();
-                return done(null, { user, accessToken, refreshToken });
+                return done(null, { 
+                    user: fullUser,
+                    accessToken,
+                    refreshToken,
+                });
             } catch (error) {
                 return done(error, false);
             }
