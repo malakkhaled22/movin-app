@@ -9,7 +9,7 @@ export const initSocket = (server: any) => {
         cors: {
             origin: [
                 'http://localhost:4200',
-                'https://movin-app.vercel.app',
+                'https://movin-backend-production.up.railway.app',
                 "*"
             ],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

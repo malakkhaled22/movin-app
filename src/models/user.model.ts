@@ -18,11 +18,15 @@ export interface IUser extends Document {
     profilePic: string;
     canSwitchRole?: boolean;
 
-    otpCode?: string;
-    otpExpire?: Date;
+    emailOtpCode?: string;
+    emailOtpExpire?: Date;
+    resetOtpCode?: string;
+    resetOtpExpire?: Date;
     isVerified?: boolean;
     refreshToken?: string | null;
     passwordResetVerification?: boolean;
+    resetOtpLastSentAt?: Date;
+    emailOtpLastSentAt?: Date;
     favorites?: Schema.Types.ObjectId[];
     searchHistory?: { location: string, count: number }[];
 
@@ -72,11 +76,15 @@ const userSchema = new Schema<IUser>(
         isBuyer: { type: Boolean, default: false },
         isBlocked: { type: Boolean, default: false },
         canSwitchRole: { type: Boolean, default: true },
-        otpCode: { type: String },
-        otpExpire: { type: Date },
+        emailOtpCode: { type: String },
+        emailOtpExpire: { type: Date },
+        resetOtpCode: { type: String },
+        resetOtpExpire: { type: Date },
         isVerified: { type: Boolean, default: false },
         refreshToken: {type: String, default: null },
-        passwordResetVerification: { type: Boolean, default: null },
+        passwordResetVerification: { type: Boolean, default: false },
+        resetOtpLastSentAt: { type: Date },
+        emailOtpLastSentAt: { type: Date },
         isGoogleAuth: { type: Boolean, default: false },
         favorites: [{
             type: mongoose.Types.ObjectId,
