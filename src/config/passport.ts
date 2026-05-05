@@ -52,7 +52,8 @@ passport.use(
                     isBuyer: fullUser.isBuyer,
                 });
                 fullUser.refreshToken = refreshToken;
-                await user.save();
+                await fullUser.save();
+                
                 return done(null, { 
                     user: fullUser,
                     accessToken,
