@@ -16,6 +16,8 @@ import reportRoutes from "./routes/report.routes";
 import recommendRoutes from "./routes/recommendations.routes";
 import auctionRoutes from "./routes/auctions.routes";
 import profileRoutes from "./routes/profile.routes";
+import aiRoutes from "./routes/aiPrediction.routes";
+import mappingRoutes from "./routes/mappingAreas.routes";
 import path from "path";
 import http from "http";
 import { initSocket } from "./socket";
@@ -49,7 +51,6 @@ app.use(cors({
 app.use(express.json());
 app.use(passport.initialize());
 
-// Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authOtpRoutes);
 app.use("/api/auth", GoogleAuthRoutes);
@@ -62,6 +63,8 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/recommend", recommendRoutes);
 app.use("/api/users", profileRoutes);
 app.use("/api/properties",auctionRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/map", mappingRoutes);
 app.use("/uploads", express.static("uploads"));
 app.set('trust proxy', 2);
 
