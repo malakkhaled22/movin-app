@@ -32,16 +32,16 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
     }
 };
 
-export const  getAuctionStatus = (endTime?:Date)=>{
-    if(!endTime) return "ended";
+const getAuctionStatus = (endTime?: Date) => {
+    if (!endTime) return "ended";
 
     const now = new Date();
     const diff = endTime.getTime() - now.getTime();
-
-    if(diff <= 0) return "ended";
-    if(diff <= 60000) return "endingSoon"
-
-    return "active";
+    if (diff <= 0) return "ended";
+    
+    const TWO_HOUR = 120 * 60 * 1000;
+    if (diff <= TWO_HOUR) return "endingSoon";
+    return "live";
 };
 
 export const getAllAuctionProperties = async (req: Request, res: Response) => {
@@ -86,9 +86,10 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
         views: p.views
     }));
 
+    const TWO_HOUR = 120 * 60 * 1000;
     const endingSoon = await Property.countDocuments({
         ...filter,
-        "auction.endTime": { $gt: now, $lte: new Date(now.getTime() + 60000) }
+        "auction.endTime": { $gt: now, $lte: new Date(now.getTime() + TWO_HOUR) }
     });
 
     const totalBidsAgg = await Property.aggregate([
