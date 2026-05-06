@@ -130,6 +130,13 @@ export const approveAuction = async (req: Request, res: Response)=>{
             title: "Auction Approved",
             body: "Your auction has been approved and now its live",
             type: "alert",
+            action: {
+                screen: "SellerPropertyDetails",
+                entityId: propertyId.toString(),
+                extra: {
+                    openAuctionTab: true,
+                }
+            },
         });
 
         await logAdminActivity({
@@ -166,6 +173,13 @@ export const rejectAuction = async (req:Request, res:Response)=>{
             title: "Auction Rejected",
             body: `Your auction has been rejected. Reason: ${reason || null}`,
             type: "alert",
+            action: {
+                screen: "SellerPropertyDetails",
+                entityId: propertyId.toString(),
+                extra: {
+                    openAuctionTab: true,
+                }
+            },
         });
         await logAdminActivity({
             type: "auction",
