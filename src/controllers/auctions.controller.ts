@@ -9,6 +9,15 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
         const property = await Property.findById(propertyId);
 
         if (!property) return res.status(404).json({ message: "Property not found" });
+        if (
+            property.auction?.isAuction &&
+            property.auction.endTime &&
+            property.auction.endTime < new Date()
+        ) {
+            property.auction.status = "ended";
+            property.auction.isAuction = false;
+            await property.save();
+        }
 
         const bids = await Bid.find({ property: propertyId })
             .populate("user", "username")
@@ -16,8 +25,9 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
             .limit(10);
         
         const now = new Date();
-        const timeRemaining = property.auction?.endTime ? property.auction.endTime.getTime() - now.getTime() : 0;
-
+        
+        const timeRemaining = property.auction?.endTime
+            ? Math.max(0, property.auction.endTime.getTime() - now.getTime()) : 0;
         return res.json({
             property,
             currentBid: property.auction?.currentBid,
