@@ -23,7 +23,7 @@ export const getReportsWithPagination = async ({
                 path: "targetId",
                 select: "username email seller type location",
             })
-            .sort({ status: -1, createdAt: -1 })
+            .sort({ status: 1, createdAt: -1 })
             .skip(skip)
             .limit(limit),
 
