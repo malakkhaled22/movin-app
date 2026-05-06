@@ -12,7 +12,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        //Seller Profile
         if (user.isSeller) {
             const properties = await Property.find({ seller: userId });
             const propertiesListed = properties.length;
@@ -29,7 +28,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
             });
         }
 
-        //Buyer Profiles
         if (user.isBuyer) {
             const favoritesCount = user.favorites?.length || 0;
             const auctionParticipated = await Bid.distinct("property", { user: userId });
@@ -44,7 +42,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
                 }
             });
         }
-        //Admin Profile
         if ((user as any).isAdmin) {
             const totalUsers = await User.countDocuments();
 
@@ -106,6 +103,10 @@ export const updateUserProfile = async (req: Request, res: Response) => {
             title: "Profile updated ✅",
             body: "Your profile has been updated successfully.",
             type: "alert",
+            action: {
+                    screen: "Profile",
+                    entityId: userId.toString(),
+                }
         });
         
         return res.status(200).json({ message: "Profile updated successfully", user });

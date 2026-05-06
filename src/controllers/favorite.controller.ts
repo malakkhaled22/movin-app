@@ -30,6 +30,10 @@ export const addFavorite = async (req: Request, res: Response) => {
                 title: "Someone liked your property ❤️",
                 body: `${user?.username} added your property in ${property.location} to favorites.`,
                 type: "message",
+                action: {
+                    screen: "PropertyDetails",
+                    entityId: propertyId.toString(),
+                }
             })
         }
 

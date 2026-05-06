@@ -120,6 +120,10 @@ export const verifyEmailOtp = async (req: Request, res: Response) => {
         title: "Account Verified ✅",
         body: "Your email has been verified successfully. You can now use all features.",
         type: "alert",
+        action: {
+            screen: "Profile",
+            entityId: user.id.toString(),
+        }
     });
 
     res.status(200).json({ message: "Email verified successfully",

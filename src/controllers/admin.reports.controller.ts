@@ -60,11 +60,34 @@ export const updateReportStatus = async (req: Request, res: Response) => {
                 description: `Report ID: ${reportId}`,
                 icon: "file"
             });
+            let action: any = null
+
+            if(existingReport.targetType === "Property"){
+                action = {
+                    screen: "PropertyDetails",
+                    entityId: existingReport.targetId.toString(),
+                    extra: {
+                        reportId: reportId.toString(),
+                        status: "resolved"
+                    }
+                };
+            }
+            if(existingReport.targetType === "User"){
+                action = {
+                    screen: "SellerProfile",
+                    entityId: existingReport.targetId.toString(),
+                    extra: {
+                        reportId: reportId.toString(),
+                        status: "resolved"
+                    }
+                };
+            }
             await createNotificationForUser({
                 userId: existingReport.reportedBy.toString(),
                 title: "Report Resolved",
                 body: "Your report has been reviewed and resolved by the admin.",
                 type: "alert",
+                action,
             });
         }
 

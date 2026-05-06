@@ -235,7 +235,12 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 userId: winner._id.toString(),
                 title: "Congrats you won the auction!",
                 body: `You've won the auction with price ${amount}`,
-                type: "message"
+                type: "message",
+                action: {
+                    screen: "PropertyDetails",
+                    entityId: propertyId.toString(),
+                    extra: { openAuctionTab: true }
+                }
             });
         }
 
@@ -252,7 +257,12 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 userId: id,
                 title: "Auction Ended",
                 body: "Unfortunately you did not win that auction",
-                type: "message"
+                type: "message",
+                action: {
+                    screen: "PropertyDetails",
+                    entityId: propertyId.toString(),
+                    extra: { openAuctionTab: true }
+                }
             });
         }
         io.to(propertyId.toString()).emit("auctionEnded", {

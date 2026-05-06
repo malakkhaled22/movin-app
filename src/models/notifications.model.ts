@@ -6,6 +6,11 @@ export interface INotification extends Document {
     body: string;
     type: string;
     read: boolean;
+    action?: {
+        screen: string;
+        entityId?: string;
+        extra?: any;
+    }
 };
 
 const notificationSchema = new Schema<INotification>({
@@ -18,6 +23,11 @@ const notificationSchema = new Schema<INotification>({
     body: { type: String, required: true },
     type: { type: String, default: "alert" },
     read: { type: Boolean, default: false },
+    action: {
+        screen: { type: String },
+        entityId: { type: String },
+        extra: { type: Schema.Types.Mixed },
+    },
 },
     { timestamps: true },
 );

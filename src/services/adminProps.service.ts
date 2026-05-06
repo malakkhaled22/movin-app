@@ -54,6 +54,10 @@ export const reviewProperty = async (
                 : `Your property "${property.type}" was rejected. Reason: ${property.rejectedReason}`,
         type: "alert",
         read: false,
+        action: {
+                    screen: "SellerPropertyDetails",
+                    entityId: propertyId.toString(),
+                }
     });
 
     if (status === "approved" && property.auction?.isAuction) {
@@ -76,7 +80,12 @@ export const reviewProperty = async (
                     userId: user._id.toString(),
                     title: "New Auction Available!",
                     body: `New auction has started on a property in ${property.location}`,
-                    type: "alert"
+                    type: "alert",
+                    action: {
+                    screen: "PropertyDetails",
+                    entityId: propertyId.toString(),
+                    extra: { openAuctionTab: true }
+                },
                 })
             )
         )
