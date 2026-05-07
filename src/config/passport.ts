@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
 import dotenv from "dotenv";
+import { createNotificationForUser } from "../services/notifications.service";
 
 dotenv.config();
 
@@ -54,6 +55,16 @@ passport.use(
                 fullUser.refreshToken = refreshToken;
                 await fullUser.save();
                 
+                await createNotificationForUser({
+                userId: user.id.toString(),
+                title: "Account Verified ✅",
+                body: "Your email has been verified successfully. You can now use all features.",
+                type: "alert",
+                action: {
+                    screen: "Profile",
+                    entityId: user.id.toString(),
+                }
+            });
                 return done(null, { 
                     user: fullUser,
                     accessToken,
