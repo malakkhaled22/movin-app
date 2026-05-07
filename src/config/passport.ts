@@ -23,9 +23,10 @@ passport.use(
                     return done(new Error("Google email not found"), false);
 
                 let user = await User.findOne({ email });
-
+                let newUserCreated = false;
                 if (!user) {
                     console.log("NEW GOOGLE USER REGISTERED: ", email);
+                    newUserCreated = true;
                     user = await User.create({
                         username: name,
                         email,
@@ -55,16 +56,18 @@ passport.use(
                 fullUser.refreshToken = refreshToken;
                 await fullUser.save();
                 
-                await createNotificationForUser({
-                userId: fullUser.id.toString(),
-                title: "Account Verified with Google ✅",
-                body: "Your email has been verified within google successfully. You can now use all features.",
-                type: "alert",
-                action: {
-                    screen: "Profile",
-                    entityId: fullUser.id.toString(),
+                if(newUserCreated) {
+                    await createNotificationForUser({
+                    userId: fullUser.id.toString(),
+                    title: "Account Verified with Google ✅",
+                    body: "Your email has been verified successfully with Google. You can now use all features.",
+                    type: "alert",
+                    action: {
+                        screen: "Profile",
+                        entityId: fullUser.id.toString(),
+                    }
+                });
                 }
-            });
                 return done(null, { 
                     user: fullUser,
                     accessToken,
