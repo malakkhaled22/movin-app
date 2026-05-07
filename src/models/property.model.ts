@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IProperty extends Document {
     location: string;
     description: string;
+    title: string;
     price: number;
     type: "apartment" | "villa" | "office" | "penthouse" | "townhouse";
     listingType: "rent" | "sale";
@@ -11,6 +12,10 @@ export interface IProperty extends Document {
         url: string;
         public_id: string;
     }[];
+    coordinates: {
+        latitude: number;
+        longitude: number;
+    };
     details: any;
     seller: mongoose.Types.ObjectId;
     status: string;
@@ -32,6 +37,21 @@ const propertySchema = new Schema<IProperty>(
     {
         location: { type: String, required: true },
         description: { type: String, required: true },
+        title: {
+        type: String,
+        required: true,
+        trim: true,
+        },
+        coordinates: {
+            latitude: {
+                type: Number,
+                required: true
+            },
+            longitude: {
+                type: Number,
+                required: true
+            }
+        },
         price: { type: Number, required: true },
         listingType: {
             type: String,
@@ -44,12 +64,28 @@ const propertySchema = new Schema<IProperty>(
             required: true
         },
         size: { type: Number, required: true },
-        images: [
-            {
-                url: String,
-                public_id: String,
-            }
-        ],
+        images: {
+            type: [
+                {
+                    url: String,
+                    public_id: String,
+                }
+            ],
+            validate: [
+                {
+                    validator: function(images: any[]) {
+                        return images.length >= 3;
+                    },
+                    message: "Minimum 3 images are required"
+                },
+                {
+                    validator: function(images: any[]) {
+                        return images.length <= 12;
+                    },
+                    message: "Maximum 12 images are allowed"
+                }
+            ]
+        },
         seller: {
             type: Schema.Types.ObjectId,
             ref: "User",

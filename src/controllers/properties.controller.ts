@@ -1,8 +1,9 @@
-import { Property } from "../models/property.model";
+import { IProperty, Property } from "../models/property.model";
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import cloudinary from "../config/cloudinary";
 import PropertyView from "../models/propertyView.model";
+import { createNotificationForUser } from "../services/notifications.service";
 
 export const createProperty = async (req: Request, res: Response) => {
   try {
@@ -14,6 +15,17 @@ export const createProperty = async (req: Request, res: Response) => {
     }
 
     const files = req.files as Express.Multer.File[];
+    if (!files || files.length < 3) {
+      return res.status(400).json({
+        message: "Minimum 3 images are required"
+      });
+    }
+
+    if (files.length > 12) {
+      return res.status(400).json({
+        message: "Maximum 12 images are allowed"
+      });
+    }
     const images: any[] = [];
 
     if (files && files.length > 0) {
@@ -35,9 +47,19 @@ export const createProperty = async (req: Request, res: Response) => {
         });
       }
     }
-    
+    const coordinates = typeof req.body.coordinates === "string"
+      ? JSON.parse(req.body.coordinates)
+      : req.body.coordinates;
+
+      if (!coordinates || coordinates.latitude === undefined || coordinates.longitude === undefined) {
+          return res.status(400).json({
+            message: "Coordinates are required"
+          });
+      }
     const newProperty = await Property.create({
       ...req.body,
+      title: req.body.title,
+      coordinates: coordinates,
       images,
       seller: user._id,
       status: "pending",
@@ -53,7 +75,16 @@ export const createProperty = async (req: Request, res: Response) => {
         }
       : undefined,
     });
-
+    await createNotificationForUser({
+            userId: user._id.toString(),
+            title: "Your property has been created ✅",
+            body: "Your property has been created successfully and is pending approval.",
+            type: "alert",
+            action: {
+                    screen: "SellerPropertyDetails",
+                    entityId: newProperty.id.toString(),
+                }
+        });
     res.status(201).json({
       message: "Property created successfully, pending approval",
       property: newProperty,
@@ -67,12 +98,12 @@ export const createProperty = async (req: Request, res: Response) => {
 
 export const deleteProperty = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const propertyId  = req.params["propertyId"];
     const sellerId = (req.user as any)._id;
 
-    if (!id) return res.status(400).json({ message: "Property ID required" });
+    if (!propertyId) return res.status(400).json({ message: "Property ID required" });
 
-    const property = await Property.findOne({ _id: id, seller: sellerId });
+    const property = await Property.findOne({ _id: propertyId, seller: sellerId });
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
     }
@@ -88,7 +119,7 @@ export const deleteProperty = async (req: Request, res: Response) => {
       }
     }
 
-    await Property.findByIdAndDelete(id);
+    await Property.findByIdAndDelete(propertyId);
 
     return res.status(200).json({
       message: "Property and all images deleted successfully",
@@ -102,22 +133,56 @@ export const deleteProperty = async (req: Request, res: Response) => {
 
 export const updateProperty = async (req: any, res: any) => {
   try {
-    const { id } = req.params;
+    const propertyId  = req.params["propertyId"];
     const sellerId = req.user._id;
+    const property = await Property.findOne({
+      _id: propertyId,
+      seller: sellerId
+    });
 
-    const property = await Property.findOne({ _id: id, seller: sellerId });
-    if (!property) return res.status(404).json({ message: "Property not found" });
+    if (!property)
+      return res.status(404).json({ message: "Property not found" });
 
-    Object.assign(property, req.body);
+    if (req.body.auction) 
+      return res.status(400).json({ message: "Auction data cannot be updated" });
 
+    const allowedFields : (keyof IProperty)[] = [
+      "title",
+      "location",
+      "description",
+      "price",
+      "type",
+      "listingType",
+      "size",
+      "details",
+    ];
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        (property as any)[field] = req.body[field];
+      }
+    }
+    if (req.body.coordinates) {
+      property.coordinates =
+        typeof req.body.coordinates === "string"
+          ? JSON.parse(req.body.coordinates)
+          : req.body.coordinates;
+    }
     if (req.files && req.files.length > 0) {
-
+      if (req.files.length < 3) {
+        return res.status(400).json({
+          message: "Minimum 3 images are required"
+        });
+      }
+      if (req.files.length > 12) {
+        return res.status(400).json({
+          message: "Maximum 12 images are allowed"
+        });
+      }
       for (const img of property.images) {
         if (img.public_id) {
           await cloudinary.uploader.destroy(img.public_id);
         }
       }
-
       const files = req.files as Express.Multer.File[];
       const images: any[] = [];
 
@@ -138,20 +203,33 @@ export const updateProperty = async (req: any, res: any) => {
           public_id: result.public_id,
         });
       }
-
       property.images = images;
     }
 
     await property.save();
 
-    res.status(200).json({
+    await createNotificationForUser({
+      userId: sellerId.toString(),
+      title: "Your property has been updated ✅",
+      body: "Your property has been updated successfully.",
+      type: "alert",
+      action: {
+        screen: "SellerPropertyDetails",
+        entityId: propertyId.toString(),
+      }
+    });
+
+    return res.status(200).json({
       message: "Property updated successfully",
       property,
     });
 
   } catch (error) {
     console.error("Update Property Error:", error);
-    res.status(500).json({ message: "Server Error" });
+
+    return res.status(500).json({
+      message: "Server Error"
+    });
   }
 };
 
@@ -163,15 +241,15 @@ export const getAllProperties = async (req: Request, res: Response) => {
     if (!seller) return res.status(404).json({ message: "Seller not found" });
     if (!seller.isSeller) return res.status(403).json({ message: "Unauthorized" });
 
-    const products = await Property.find({ seller: sellerId });
+    const properties = await Property.find({ seller: sellerId });
 
     return res.status(200).json({
-      message: "Products fetched successfully",
-      products,
+      message: "Properties fetched successfully",
+      properties,
     });
 
   } catch (error) {
-    console.error("Get All Products Error:", error);
+    console.error("Get All Properties Error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -179,22 +257,25 @@ export const getAllProperties = async (req: Request, res: Response) => {
 export const getOneProperty = async (req: Request, res: Response) => {
   try {
     const sellerId = (req.user as any)._id;
-    const productId = req.params["id"];
+    const propertyId = req.params["propertyId"];
 
     if (!sellerId) return res.status(404).json({ message: "User not found" });
 
-    const product = await Property.findByIdAndUpdate({
-      _id: productId,
-      seller: sellerId,
+    const property = await Property.findOneAndUpdate(
+    {
+      _id: propertyId, seller: sellerId,
     },
-      {$inc: {views: 1}},
-    );
-
-    if (!product) return res.status(404).json({ message: "Property not found" });
-
-    res.status(200).json(product);
-
+    {
+      $inc: { views: 1 }
+    },
+    {
+      new: true
+    }
+  );
+    if (!property) return res.status(404).json({ message: "Property not found" });
+    res.status(200).json(property);
   } catch (error) {
+    console.error("Get One Property Error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -294,7 +375,7 @@ export const filterProperties = async (req: Request, res: Response) => {
   }
 };
 
-export const searchPropertyLocation = async (req: Request, res: Response) => {
+export const searchPropertyByLocation = async (req: Request, res: Response) => {
   try {
     const location = req.query.location as string;
     const userId = (req.user as any)._id;
@@ -344,7 +425,7 @@ export const getRecentProperties = async (req: Request, res: Response) => {
   }
 };
 
-export const getPropertyByType = async (req: Request, res: Response) => {
+export const getPropertyByListingType = async (req: Request, res: Response) => {
   try {
     const type = req.query.type as string;
 
@@ -364,7 +445,7 @@ export const getPropertyByType = async (req: Request, res: Response) => {
 
 export const getPropertyDetailsForBuyer = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params["id"];
+    const propertyId = req.params["propertyId"];
     const userId = (req.user as any)._id;
 
     const property = await Property.findOneAndUpdate(
