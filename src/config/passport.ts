@@ -56,7 +56,7 @@ passport.use(
                 await fullUser.save();
                 
                 await createNotificationForUser({
-                userId: user.id.toString(),
+                userId: fullUser.id.toString(),
                 title: "Account Verified ✅",
                 body: "Your email has been verified successfully. You can now use all features.",
                 type: "alert",
