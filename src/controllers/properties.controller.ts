@@ -103,16 +103,20 @@ export const deleteProperty = async (req: Request, res: Response) => {
 
     if (!propertyId) return res.status(400).json({ message: "Property ID required" });
 
-    const property = await Property.findOne({ _id: propertyId, seller: sellerId });
+    const property = await Property.findOne({ 
+      _id: propertyId, seller: sellerId,
+      status: "approved",
+    });
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
     }
-
+    if(property.status === "pending") {
+      return res.status(400).json({ message: "Cannot delete property while it's pending approval" });
+    }
     const seller = await User.findById(sellerId);
     if (!seller || !seller.isSeller) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-
     for (const img of property.images) {
       if (img.public_id) {
         await cloudinary.uploader.destroy(img.public_id);
@@ -137,12 +141,16 @@ export const updateProperty = async (req: any, res: any) => {
     const sellerId = req.user._id;
     const property = await Property.findOne({
       _id: propertyId,
-      seller: sellerId
+      seller: sellerId,
+      status: "approved",
     });
 
     if (!property)
       return res.status(404).json({ message: "Property not found" });
 
+    if(property.status === "pending") {
+      return res.status(400).json({ message: "Cannot update property while it's pending approval" });
+    }
     if (req.body.auction) 
       return res.status(400).json({ message: "Auction data cannot be updated" });
 
@@ -241,7 +249,9 @@ export const getAllProperties = async (req: Request, res: Response) => {
     if (!seller) return res.status(404).json({ message: "Seller not found" });
     if (!seller.isSeller) return res.status(403).json({ message: "Unauthorized" });
 
-    const properties = await Property.find({ seller: sellerId });
+    const properties = await Property.find({
+      seller: sellerId, status: "approved" 
+    }).sort({ createdAt: -1 });
 
     return res.status(200).json({
       message: "Properties fetched successfully",
@@ -264,6 +274,7 @@ export const getOneProperty = async (req: Request, res: Response) => {
     const property = await Property.findOneAndUpdate(
     {
       _id: propertyId, seller: sellerId,
+      status: "approved"
     },
     {
       $inc: { views: 1 }
