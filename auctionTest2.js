@@ -1,9 +1,13 @@
 const { io } = require("socket.io-client");
 
-const socket = io("http://localhost:3000");
+const socket = io("http://localhost:3000", {
+    auth: {
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgxOTAwMjksImV4cCI6MTc3ODE5MDkyOX0.m4lXUp9owdU-Hn8uJ_t_krIXE-3sFwjDmYUvINi-2Ug"
+    }
+});
 
-const PROPERTY_ID = "69ddb1d3934aabd06d868599";
-const USER_ID = "69ce47ca3260b566ba8bb20f";
+const PROPERTY_ID = "69fbcbcc5fa764a6d10f2643";
+const USER_ID = "69e8a9cd5c2c3108e605fc3d";
 
 socket.on("connect", () => {
     console.log("✅ Connected:", socket.id);

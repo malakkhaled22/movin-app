@@ -250,7 +250,7 @@ export const getAllProperties = async (req: Request, res: Response) => {
     if (!seller.isSeller) return res.status(403).json({ message: "Unauthorized" });
 
     const properties = await Property.find({
-      seller: sellerId, status: "approved" 
+      seller: sellerId, 
     }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -273,8 +273,8 @@ export const getOneProperty = async (req: Request, res: Response) => {
 
     const property = await Property.findOneAndUpdate(
     {
-      _id: propertyId, seller: sellerId,
-      status: "approved"
+      _id: propertyId, 
+      seller: sellerId,
     },
     {
       $inc: { views: 1 }

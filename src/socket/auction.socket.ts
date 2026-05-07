@@ -5,22 +5,25 @@ import { createNotificationForUser } from "../services/notifications.service";
 
 type PlaceBidData = {
     propertyId: string;
-    userId: string;
-
     amount?: number;
     increment?: number;
     percent?: number;
 };
+type BidInput = {
+    amount?: number;
+    increment?: number;
+    percent?: number;
+}
 const calculateBidAmount = (
     currentBid: number,
     startPrice: number,
-    data: PlaceBidData
-) => {
+    data: BidInput
+    ) => {
     const base = currentBid || startPrice;
 
     if (data.amount !== undefined) return data.amount;
     if (data.increment !== undefined) return base + data.increment;
-    if (data.percent !==undefined) return base + (base * data.percent) / 100;
+    if (data.percent !== undefined) return base + (base * data.percent) / 100;
 
     return base;
 };
@@ -107,20 +110,30 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
         }
     });
 
-    socket.on("placeBid", async ({ propertyId, amount,increment,percent, userId }: PlaceBidData) => {
+    socket.on("placeBid", async ({ propertyId, amount,increment,percent}: PlaceBidData) => {
         try {
+            const userId = socket.data.user?._id;
+            if (!userId) {
+            return socket.emit("bidError", "Unauthorized");
+            }
             const roomId = propertyId.toString();
-            console.log("ROOM:", roomId);
+
             const now = Date.now();
-            const lastTime = lastBidTime.get(socket.id) || 0;
+            const lastTime = lastBidTime.get(userId.toString()) || 0;
+
             if (now - lastTime < 1000) {
                 return socket.emit("bidError", "Too many bids");
             }
-            lastBidTime.set(socket.id, now);
+            lastBidTime.set(userId.toString(), now);
 
             const property = await Property.findById(propertyId);
+
             if (!property) {
                 return socket.emit("bidError", "Property not found");
+            }
+
+            if (property.seller.toString() === userId.toString()) {
+                return socket.emit("bidError", "You cannot bid on your own property");
             }
 
             if(property.status !== "approved" || property.auction?.status !== "approved"){
@@ -133,13 +146,17 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const currentBid = property.auction.currentBid ?? 0;
             const startPrice = property.auction.startPrice ?? 0;
+
             const bidAmount = calculateBidAmount(currentBid, startPrice, {
-                propertyId, userId, amount, increment, percent
+                amount, increment, percent
             });
 
             const finalBidAmount = Math.round(bidAmount);
             if (!finalBidAmount || finalBidAmount <= 0) {
                 return socket.emit("bidError", "Invalid bid amount");
+            }
+            if (property.auction.endTime && property.auction.endTime < new Date()) {
+                return socket.emit("bidError", "Auction ended");
             }
             const updatedProperty = await Property.findOneAndUpdate({
                 _id: propertyId,
@@ -166,8 +183,8 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             }
             const dateNow = new Date();
             let endTime = updatedProperty.auction?.endTime;
-            if (endTime && endTime.getTime() - dateNow.getTime() < 30000) {
-                updatedProperty.auction!.endTime = new Date(dateNow.getTime() + 30000);
+            if (endTime && endTime.getTime() - dateNow.getTime() < 60000) {
+                updatedProperty.auction!.endTime = new Date(dateNow.getTime() + 60000);
 
                 await updatedProperty.save();
 

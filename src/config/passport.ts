@@ -7,7 +7,6 @@ import { createNotificationForUser } from "../services/notifications.service";
 
 dotenv.config();
 
-console.log("GoogleRedirectURL", process.env.GOOGLE_REDIRECT_URL);
 passport.use(
     new GoogleStrategy(
         {
