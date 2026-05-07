@@ -62,7 +62,7 @@ passport.use(
                 type: "alert",
                 action: {
                     screen: "Profile",
-                    entityId: user.id.toString(),
+                    entityId: fullUser.id.toString(),
                 }
             });
                 return done(null, { 
