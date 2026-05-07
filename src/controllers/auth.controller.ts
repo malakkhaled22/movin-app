@@ -30,7 +30,7 @@ export const registerUser = async (req: Request, res: Response) => {
             existingUser.password = password;
 
             existingUser.emailOtpCode = hashOtp(otp);
-            existingUser.emailOtpExpire = new Date(Date.now() + 1 * 60 * 1000);
+            existingUser.emailOtpExpire = new Date(Date.now() + 5 * 60 * 1000);
 
             await existingUser.save();
 
@@ -56,7 +56,7 @@ export const registerUser = async (req: Request, res: Response) => {
             canSwitchRole: true,
             isVerified: false,
             emailOtpCode: hashOtp(otp),
-            emailOtpExpire:new Date (Date.now() + 1 * 60 * 1000),
+            emailOtpExpire:new Date (Date.now() + 5 * 60 * 1000),
         });
         
         await newUser.save();
