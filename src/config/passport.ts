@@ -57,8 +57,8 @@ passport.use(
                 
                 await createNotificationForUser({
                 userId: fullUser.id.toString(),
-                title: "Account Verified ✅",
-                body: "Your email has been verified successfully. You can now use all features.",
+                title: "Account Verified with Google ✅",
+                body: "Your email has been verified within google successfully. You can now use all features.",
                 type: "alert",
                 action: {
                     screen: "Profile",
