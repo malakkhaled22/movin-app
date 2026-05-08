@@ -116,8 +116,8 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             if (!userId) {
             return socket.emit("bidError", "Unauthorized");
             }
-            const roomId = propertyId.toString();
 
+            const roomId = propertyId.toString();
             const now = Date.now();
             const lastTime = lastBidTime.get(userId.toString()) || 0;
 
@@ -127,7 +127,6 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             lastBidTime.set(userId.toString(), now);
 
             const property = await Property.findById(propertyId);
-
             if (!property) {
                 return socket.emit("bidError", "Property not found");
             }
