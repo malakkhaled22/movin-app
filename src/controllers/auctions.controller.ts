@@ -21,7 +21,16 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
         const property = await Property.findById(propertyId);
 
         if (!property) return res.status(404).json({ message: "Property not found" });
-        
+        if (
+            property.auction?.isAuction &&
+            property.auction.endTime &&
+            property.auction.endTime < new Date()
+        ) {
+            property.auction.status = "ended";
+            property.auction.isAuction = false;
+            await property.save();
+        }
+
         const bids = await Bid.find({ property: propertyId })
             .populate("user", "username")
             .sort({ amount: -1 })
@@ -31,18 +40,17 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
         
         const timeRemaining = property.auction?.endTime
             ? Math.max(0, property.auction.endTime.getTime() - now.getTime()) : 0;
-        
-            return res.json({
+        return res.json({
             property,
             currentBid: property.auction?.currentBid,
             startPrice: property.auction?.startPrice,
             totalBids: property.auction?.totalBids,
             timeRemaining,
-            status: getAuctionStatus(property.auction?.endTime),
+            status: getAuctionStatus(property.auction?.endTime), 
             bidHistory: bids
         });
     } catch (error) {
-        console.error("Error in Auction Details", error);
+        console.error("Error in Auction ", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -57,8 +65,8 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
 
     const filter = {
         "auction.isAuction": true,
-        status: "approved",
-        "auction.status": { $in: ["endingSoon", "live"] },
+        "auction.status": { $ne: "ended" },
+        status: "approved"
     };
 
     const totalAuctions = await Property.countDocuments(filter);
@@ -92,10 +100,7 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
     const TWO_HOUR = 120 * 60 * 1000;
     const endingSoon = await Property.countDocuments({
         ...filter,
-        "auction.endTime": 
-        { $gt: now, 
-        $lte: new Date(now.getTime() + TWO_HOUR) 
-        }
+        "auction.endTime": { $gt: now, $lte: new Date(now.getTime() + TWO_HOUR) }
     });
 
     const totalBidsAgg = await Property.aggregate([
