@@ -2,46 +2,6 @@ import { Request, Response } from "express";
 import Property from "../models/property.model";
 import Bid from "../models/bid.model";
 
-export const getAuctionDetails = async (req: Request, res: Response) => {
-    try {
-        const { propertyId } = req.params;
-
-        const property = await Property.findById(propertyId);
-
-        if (!property) return res.status(404).json({ message: "Property not found" });
-        if (
-            property.auction?.isAuction &&
-            property.auction.endTime &&
-            property.auction.endTime < new Date()
-        ) {
-            property.auction.status = "ended";
-            property.auction.isAuction = false;
-            await property.save();
-        }
-
-        const bids = await Bid.find({ property: propertyId })
-            .populate("user", "username")
-            .sort({ amount: -1 })
-            .limit(10);
-        
-        const now = new Date();
-        
-        const timeRemaining = property.auction?.endTime
-            ? Math.max(0, property.auction.endTime.getTime() - now.getTime()) : 0;
-        return res.json({
-            property,
-            currentBid: property.auction?.currentBid,
-            startPrice: property.auction?.startPrice,
-            totalBids: property.auction?.totalBids,
-            timeRemaining,
-            bidHistory: bids
-        });
-    } catch (error) {
-        console.error("Error in Auction ", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-};
-
 const getAuctionStatus = (endTime?: Date) => {
     if (!endTime) return "ended";
 
@@ -54,6 +14,39 @@ const getAuctionStatus = (endTime?: Date) => {
     return "live";
 };
 
+export const getAuctionDetails = async (req: Request, res: Response) => {
+    try {
+        const { propertyId } = req.params;
+
+        const property = await Property.findById(propertyId);
+
+        if (!property) return res.status(404).json({ message: "Property not found" });
+        
+        const bids = await Bid.find({ property: propertyId })
+            .populate("user", "username")
+            .sort({ amount: -1 })
+            .limit(10);
+        
+        const now = new Date();
+        
+        const timeRemaining = property.auction?.endTime
+            ? Math.max(0, property.auction.endTime.getTime() - now.getTime()) : 0;
+        
+            return res.json({
+            property,
+            currentBid: property.auction?.currentBid,
+            startPrice: property.auction?.startPrice,
+            totalBids: property.auction?.totalBids,
+            timeRemaining,
+            status: getAuctionStatus(property.auction?.endTime),
+            bidHistory: bids
+        });
+    } catch (error) {
+        console.error("Error in Auction Details", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 export const getAllAuctionProperties = async (req: Request, res: Response) => {
     try {
     const now = new Date();
@@ -64,7 +57,6 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
 
     const filter = {
         "auction.isAuction": true,
-        "auction.endTime": { $gt: now },
         status: "approved"
     };
 
@@ -99,7 +91,10 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
     const TWO_HOUR = 120 * 60 * 1000;
     const endingSoon = await Property.countDocuments({
         ...filter,
-        "auction.endTime": { $gt: now, $lte: new Date(now.getTime() + TWO_HOUR) }
+        "auction.endTime": 
+        { $gt: now, 
+        $lte: new Date(now.getTime() + TWO_HOUR) 
+        }
     });
 
     const totalBidsAgg = await Property.aggregate([

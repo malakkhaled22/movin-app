@@ -2,11 +2,11 @@ const { io } = require("socket.io-client");
 
 const socket = io("http://localhost:3000", {
     auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZkMDY0OTBiOGFkYjZkNWIzNjIzM2EiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgxODk5NzIsImV4cCI6MTc3ODE5MDg3Mn0.SLaqW9yzqcroHIrl5bvs43HBpneKtQ2owfvrCc6Xqq8"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgxOTU2NjMsImV4cCI6MTc3ODE5NjU2M30.Xs9qE8KudgonPqvE98HWAOoLLd6cLY9VAoZU5RaFLpA"
     }
 });
 
-const PROPERTY_ID = "69fbcbcc5fa764a6d10f2643";
+const PROPERTY_ID = "69fd17889557999d2747a6f5";
 const USER_ID = "69f20223af1739d7064fa5cd";
 
 socket.on("connect", () => {
@@ -18,7 +18,7 @@ socket.on("connect", () => {
         console.log("📌 Sending bid...");
         socket.emit("placeBid", {
             propertyId: PROPERTY_ID,
-            percent: 5,
+            percent: 10,
             userId: USER_ID
         });
     }, 3000);
