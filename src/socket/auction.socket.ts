@@ -9,11 +9,20 @@ type PlaceBidData = {
     increment?: number;
     percent?: number;
 };
+
 type BidInput = {
     amount?: number;
     increment?: number;
     percent?: number;
-}
+};
+
+const BID_RATE_LIMIT = 1000;
+const AUCTION_EXTENDED = 60_000;
+const ENDING_SOON_TWO_HOURS = 120 * 60 * 1000;
+
+const lastBidTime = new Map<string, number>();
+const auctionTimers = new Map<string, NodeJS.Timeout>();
+
 const calculateBidAmount = (
     currentBid: number,
     startPrice: number,
@@ -28,14 +37,36 @@ const calculateBidAmount = (
     return base;
 };
 
-const lastBidTime = new Map<string, number>();
-const auctionTimers = new Map<string, NodeJS.Timeout>();
+const getAuctionStatus = (endTime?: Date) => {
+    if (!endTime) return "ended";
 
-const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
+    const now = new Date();
+    const diff = endTime.getTime() - now.getTime();
+
+    if (diff <= 0) return "ended";
+    if (diff <= ENDING_SOON_TWO_HOURS) return "endingSoon";
+
+    return "live";
+};
+
+const mapBidResponse = (bid: any) => ({
+    _id: bid._id,
+    property: bid.property,
+    amount: bid.amount,
+    createdAt: bid.createdAt,
+    user: (bid.user as any).username,
+});
+
+const clearAuctionTimer = (propertyId: string) => {
     if (auctionTimers.has(propertyId)) {
         clearTimeout(auctionTimers.get(propertyId)!);
         auctionTimers.delete(propertyId);
     }
+};
+
+const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
+    
+    clearAuctionTimer(propertyId);
 
     const now = new Date();
     const timeLeft = endTime.getTime() - now.getTime();
@@ -44,26 +75,19 @@ const scheduleAuctionEnd = (io: Server, propertyId: string, endTime: Date) => {
         endAuction(io, propertyId);
         return;
     }
-
     const timer = setTimeout(() => {
         endAuction(io, propertyId);
-        auctionTimers.delete(propertyId);
+        clearAuctionTimer(propertyId);
     }, timeLeft);
-
     auctionTimers.set(propertyId, timer);
 };
 
-const getAuctionStatus = (endTime?: Date) => {
-    if (!endTime) return "ended";
-    const now = new Date();
-    const diff = endTime.getTime() - now.getTime();
+const emitAuctionError = (socket: Socket, message: string) => {
+    return socket.emit("auctionError", message);
+};
 
-    if (diff <= 0) return "ended";
-    
-    const TWO_HOUR = 120 * 60 * 1000;
-    if (diff <= TWO_HOUR) return "endingSoon";
-
-    return "live";
+const emitBidError = (socket: Socket, message: string) => {
+    return socket.emit("bidError", message);
 };
 
 export const setupAuctionSocket = (io: Server, socket: Socket) => {
@@ -89,13 +113,9 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 scheduleAuctionEnd(io, propertyId, property.auction.endTime);
             }
             const status = getAuctionStatus(property.auction.endTime);
-            const bidsResponse = bids.map((bid) => ({
-                _id: bid._id,
-                property: bid.property,
-                amount: bid.amount,
-                createdAt: bid.createdAt,
-                user: (bid.user as any).username
-            }));
+
+            const bidsResponse = bids.map(mapBidResponse);
+
             socket.emit("auctionData", {
                 property,
                 startPrice: property.auction.startPrice,
@@ -106,41 +126,44 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 bidsResponse
             });
         } catch (error) {
-            socket.emit("auctionError", "Server error");
+            emitAuctionError(socket, "Server error");
         }
     });
 
-    socket.on("placeBid", async ({ propertyId, amount,increment,percent}: PlaceBidData) => {
+    socket.on(
+        "placeBid",
+        async ({ propertyId, amount,increment,percent}: PlaceBidData) => {
         try {
             const userId = socket.data.user?._id;
             if (!userId) {
-            return socket.emit("bidError", "Unauthorized");
+                return emitBidError(socket, "Unauthorized");
             }
-
             const roomId = propertyId.toString();
+            
             const now = Date.now();
             const lastTime = lastBidTime.get(userId.toString()) || 0;
 
-            if (now - lastTime < 1000) {
-                return socket.emit("bidError", "Too many bids");
+            if (now - lastTime < BID_RATE_LIMIT) {
+                return emitBidError(socket, "Too many bids");
             }
+
             lastBidTime.set(userId.toString(), now);
 
             const property = await Property.findById(propertyId);
             if (!property) {
-                return socket.emit("bidError", "Property not found");
+                return emitBidError(socket, "Property not found");
             }
 
             if (property.seller.toString() === userId.toString()) {
-                return socket.emit("bidError", "You cannot bid on your own property");
+                return emitBidError(socket, "You cannot bid on your own property");
             }
 
             if(property.status !== "approved" || property.auction?.status !== "approved"){
-                return socket.emit("bidError", "Auction not available yet");
+                return emitBidError(socket, "Auction not available yet");
             }
 
             if(!property.auction?.isAuction){
-                return socket.emit("bidError", "Auction not found");
+                return emitBidError(socket, "Auction not found");
             }
 
             const currentBid = property.auction.currentBid ?? 0;
@@ -151,26 +174,27 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             });
 
             const finalBidAmount = Math.round(bidAmount);
+            
             if (!finalBidAmount || finalBidAmount <= 0) {
-                return socket.emit("bidError", "Invalid bid amount");
+                return emitBidError(socket, "Invalid bid amount");
             }
             if (property.auction.endTime && property.auction.endTime < new Date()) {
-                return socket.emit("bidError", "Auction ended");
+                return emitBidError(socket, "Auction ended");
             }
             const updatedProperty = await Property.findOneAndUpdate({
-                _id: propertyId,
-                status: "approved",
-                "auction.status":"approved",
-                "auction.isAuction": true,
-                "auction.endTime": { $gt: new Date() },
-                $or: [
-                    { "auction.currentBid": { $lt: finalBidAmount } },
-                    {
-                        "auction.currentBid": { $exists: false },
-                        "auction.startPrice": { $lt: finalBidAmount }
-                    }
-                ]
-            },
+                    _id: propertyId,
+                    status: "approved",
+                    "auction.status":"approved",
+                    "auction.isAuction": true,
+                    "auction.endTime": { $gt: new Date() },
+                    $or: [
+                        { "auction.currentBid": { $lt: finalBidAmount } },
+                        {
+                            "auction.currentBid": { $exists: false },
+                            "auction.startPrice": { $lt: finalBidAmount }
+                        }
+                    ]
+                },
                 {
                     $set: { "auction.currentBid": finalBidAmount },
                     $inc: { "auction.totalBids": 1 }
@@ -178,12 +202,14 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 { new: true }
             );
             if (!updatedProperty) {
-                return socket.emit("bidError", "Bid too low or invalid auction");
+                return emitBidError(socket, "Bid too low or invalid auction");
             }
             const dateNow = new Date();
             let endTime = updatedProperty.auction?.endTime;
-            if (endTime && endTime.getTime() - dateNow.getTime() < 60000) {
-                updatedProperty.auction!.endTime = new Date(dateNow.getTime() + 60000);
+
+            if (endTime && endTime.getTime() - dateNow.getTime() < AUCTION_EXTENDED) {
+
+                updatedProperty.auction!.endTime = new Date(dateNow.getTime() + AUCTION_EXTENDED);
 
                 await updatedProperty.save();
 
@@ -203,13 +229,8 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const populatedBid = await newBid.populate("user", "username");
 
-            const bidResponse = {
-                _id: populatedBid._id,
-                property: populatedBid.property,
-                amount: populatedBid.amount,
-                createdAt: populatedBid.createdAt,
-                user: (populatedBid.user as any).username,
-            };
+            const bidResponse = mapBidResponse(populatedBid);
+
             io.to(roomId).emit("newBid", {
                 bid: bidResponse,
                 currentBid: updatedProperty.auction?.currentBid,
@@ -218,18 +239,21 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 status: getAuctionStatus(updatedProperty.auction?.endTime)
             });
         } catch (error) {
-            socket.emit("bidError", "Server error");
+            emitBidError(socket, "Server error");
         }
     });
     socket.on("disconnect", () => {
-        lastBidTime.delete(socket.id);
+        const userId = socket.data.user?._id?.toString();
+        if (userId) lastBidTime.delete(userId);
     });
 };
 
 export const endAuction = async (io: Server, propertyId: string) => {
     try {
         const property = await Property.findById(propertyId);
+
         if (!property || property.status !== "approved" || !property.auction?.isAuction || property.auction?.status !== "approved") return;
+
         const highestBid = await Bid.findOne({ property: propertyId })
             .sort({ amount: -1 })
             .populate("user", "_id username");
@@ -238,10 +262,7 @@ export const endAuction = async (io: Server, propertyId: string) => {
         property.auction.status = "ended";
         await property.save();
 
-        if (auctionTimers.has(propertyId)) {
-            clearTimeout(auctionTimers.get(propertyId)!);
-            auctionTimers.delete(propertyId);
-        }
+        clearAuctionTimer(propertyId);
         
         const winner = highestBid?.user;
         const amount = highestBid?.amount || property.auction.startPrice;
@@ -261,7 +282,6 @@ export const endAuction = async (io: Server, propertyId: string) => {
         }
 
         const allBidders = await Bid.find({ property: propertyId }).distinct("user");
-
         const winnerId = highestBid?.user?._id?.toString();
 
         for (const userId of allBidders) {

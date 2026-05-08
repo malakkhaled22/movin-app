@@ -2,11 +2,11 @@ const { io } = require("socket.io-client");
 
 const socket = io("http://localhost:3000", {
     auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgxOTAwMjksImV4cCI6MTc3ODE5MDkyOX0.m4lXUp9owdU-Hn8uJ_t_krIXE-3sFwjDmYUvINi-2Ug"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgyMzQ1MTMsImV4cCI6MTc3ODIzNTQxM30.tjPBch2BRsWqbWeEskoHcf49G0HCEMisyfrdGb6eI9c"
     }
 });
 
-const PROPERTY_ID = "69fbcbcc5fa764a6d10f2643";
+const PROPERTY_ID = "69fd17889557999d2747a6f5";
 const USER_ID = "69e8a9cd5c2c3108e605fc3d";
 
 socket.on("connect", () => {

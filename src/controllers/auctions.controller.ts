@@ -72,7 +72,7 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
 
     const properties = await Property.find(filter)
         .populate("seller", "username")
-        .select("description location images auction seller type listingType size views")
+        .select("description location images title details auction seller type listingType size views")
         .sort({ "auction.endTime": 1 })
         .skip(skip)
         .limit(limit);
