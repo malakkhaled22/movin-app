@@ -57,7 +57,8 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
 
     const filter = {
         "auction.isAuction": true,
-        status: "approved"
+        status: "approved",
+        "auction.status": { $in: ["endingSoon", "live"] },
     };
 
     const totalAuctions = await Property.countDocuments(filter);
