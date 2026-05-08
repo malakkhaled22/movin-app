@@ -59,6 +59,9 @@ export const reviewProperty = async (
     action: {
         screen: "SellerPropertyDetails",
         entityId: propertyId.toString(),
+        extra: {
+                property: property,
+            }
     }
 });
 

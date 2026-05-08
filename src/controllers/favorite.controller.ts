@@ -33,6 +33,9 @@ export const addFavorite = async (req: Request, res: Response) => {
                 action: {
                     screen: "SellerPropertyDetails",
                     entityId: propertyId.toString(),
+                    extra:{
+                        property: property,
+                    }
                 }
             })
         }

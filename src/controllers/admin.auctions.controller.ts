@@ -126,7 +126,10 @@ export const approveAuction = async (req: Request, res: Response) => {
                 action: {
                     screen: "SellerPropertyDetails",
                     entityId: propertyId.toString(),
-                    extra: { openAuctionTab: true }
+                    extra: { 
+                        openAuctionTab: true,
+                        property: property,
+                    }
                 }
             });
 
@@ -191,7 +194,10 @@ export const rejectAuction = async (req: Request, res: Response) => {
             action: {
                 screen: "SellerPropertyDetails",
                 entityId: propertyId.toString(),
-                extra: { openAuctionTab: true }
+                extra: { 
+                    openAuctionTab: true,
+                    newProperty: property,
+                }
             }
         });
         await logAdminActivity({

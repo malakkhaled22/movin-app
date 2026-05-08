@@ -83,6 +83,9 @@ export const createProperty = async (req: Request, res: Response) => {
             action: {
                     screen: "SellerPropertyDetails",
                     entityId: newProperty.id.toString(),
+                    extra:{
+                      property: newProperty,
+                    }
                 }
         });
     res.status(201).json({
@@ -224,6 +227,9 @@ export const updateProperty = async (req: any, res: any) => {
       action: {
         screen: "SellerPropertyDetails",
         entityId: propertyId.toString(),
+        extra:{
+                  property: property,
+              }
       }
     });
 
@@ -273,8 +279,7 @@ export const getOneProperty = async (req: Request, res: Response) => {
 
     const property = await Property.findOneAndUpdate(
     {
-      _id: propertyId, 
-      seller: sellerId,
+      _id: propertyId, seller: sellerId,
     },
     {
       $inc: { views: 1 }

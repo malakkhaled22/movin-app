@@ -53,7 +53,10 @@ export const notifyUsersAboutNewAuction = async (property: any) => {
                     action: {
                         screen: "PropertyDetails",
                         entityId: property._id.toString(),
-                        extra: { openAuctionTab: true }
+                        extra: { 
+                            openAuctionTab: true,
+                            property: property,
+                        }
                     }
                 })
             )

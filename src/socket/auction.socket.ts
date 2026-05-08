@@ -276,7 +276,10 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 action: {
                     screen: "PropertyDetails",
                     entityId: propertyId.toString(),
-                    extra: { openAuctionTab: true }
+                    extra: { 
+                        openAuctionTab: true,
+                        property: property,
+                    }
                 }
             });
         }
@@ -297,7 +300,10 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 action: {
                     screen: "PropertyDetails",
                     entityId: propertyId.toString(),
-                    extra: { openAuctionTab: true }
+                    extra: { 
+                        openAuctionTab: true,
+                        property: property
+                    }
                 }
             });
         }
