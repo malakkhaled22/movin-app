@@ -82,7 +82,8 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
         description: p.description,
         location: p.location,
         image: p.images?.[0]?.url || null,
-
+        title: p.title,
+        details: p.details,
         startPrice: p.auction?.startPrice || 0,
         currentBid: p.auction?.currentBid || p.auction?.startPrice || 0,
         totalBids: p.auction?.totalBids || 0,
