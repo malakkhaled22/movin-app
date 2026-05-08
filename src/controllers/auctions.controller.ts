@@ -2,18 +2,6 @@ import { Request, Response } from "express";
 import Property from "../models/property.model";
 import Bid from "../models/bid.model";
 
-const getAuctionStatus = (endTime?: Date) => {
-    if (!endTime) return "ended";
-
-    const now = new Date();
-    const diff = endTime.getTime() - now.getTime();
-    if (diff <= 0) return "ended";
-    
-    const TWO_HOUR = 120 * 60 * 1000;
-    if (diff <= TWO_HOUR) return "endingSoon";
-    return "live";
-};
-
 export const getAuctionDetails = async (req: Request, res: Response) => {
     try {
         const { propertyId } = req.params;
@@ -46,13 +34,24 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
             startPrice: property.auction?.startPrice,
             totalBids: property.auction?.totalBids,
             timeRemaining,
-            status: getAuctionStatus(property.auction?.endTime), 
             bidHistory: bids
         });
     } catch (error) {
         console.error("Error in Auction ", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
+};
+
+const getAuctionStatus = (endTime?: Date) => {
+    if (!endTime) return "ended";
+
+    const now = new Date();
+    const diff = endTime.getTime() - now.getTime();
+    if (diff <= 0) return "ended";
+    
+    const TWO_HOUR = 120 * 60 * 1000;
+    if (diff <= TWO_HOUR) return "endingSoon";
+    return "live";
 };
 
 export const getAllAuctionProperties = async (req: Request, res: Response) => {
@@ -88,6 +87,8 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
         currentBid: p.auction?.currentBid || p.auction?.startPrice || 0,
         totalBids: p.auction?.totalBids || 0,
         endTime: p.auction?.endTime,
+        status: getAuctionStatus(p.auction?.endTime),
+
         seller: p.seller,
         type: p.type,
         listingType: p.listingType,
