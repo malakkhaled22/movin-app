@@ -65,7 +65,7 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
 
     const filter = {
         "auction.isAuction": true,
-        "auction.status": { $ne: "ended" },
+        "auction.endTime": { $gt: now },
         status: "approved"
     };
 
@@ -88,8 +88,6 @@ export const getAllAuctionProperties = async (req: Request, res: Response) => {
         currentBid: p.auction?.currentBid || p.auction?.startPrice || 0,
         totalBids: p.auction?.totalBids || 0,
         endTime: p.auction?.endTime,
-        status: getAuctionStatus(p.auction?.endTime),
-
         seller: p.seller,
         type: p.type,
         listingType: p.listingType,
