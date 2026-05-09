@@ -4,6 +4,7 @@ import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
 import dotenv from "dotenv";
 import { createNotificationForUser } from "../services/notifications.service";
+import { logAdminActivity } from "../services/adminActivity.service";
 
 dotenv.config();
 
@@ -65,6 +66,12 @@ passport.use(
                         screen: "Profile",
                         entityId: fullUser.id.toString(),
                     }
+                });
+                await logAdminActivity({
+                    type: "user",
+                    title: "New user registered with Google ✅",
+                    description: fullUser.email,
+                    icon: "user"
                 });
                 }
                 return done(null, { 

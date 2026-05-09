@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-import Property from "./property.model";
 
 export interface IBid extends Document{
     property: mongoose.Types.ObjectId;

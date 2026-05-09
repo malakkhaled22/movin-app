@@ -49,7 +49,7 @@ const getAuctionStatus = (endTime?: Date) => {
     return "live";
 };
 
-const mapBidResponse = (bid: any) => ({
+const mapBidHistory = (bid: any) => ({
     _id: bid._id,
     property: bid.property,
     amount: bid.amount,
@@ -114,7 +114,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             }
             const status = getAuctionStatus(property.auction.endTime);
 
-            const bidsResponse = bids.map(mapBidResponse);
+            const bidsHistory = bids.map(mapBidHistory);
 
             socket.emit("auctionData", {
                 property,
@@ -123,7 +123,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 totalBids: property.auction.totalBids || 0,
                 endTime: property.auction.endTime,
                 status,
-                bidsResponse
+                bidsHistory
             });
         } catch (error) {
             emitAuctionError(socket, "Server error");
@@ -229,7 +229,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const populatedBid = await newBid.populate("user", "username");
 
-            const bidResponse = mapBidResponse(populatedBid);
+            const bidResponse = mapBidHistory(populatedBid);
 
             io.to(roomId).emit("newBid", {
                 bid: bidResponse,
@@ -242,6 +242,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             emitBidError(socket, "Server error");
         }
     });
+
     socket.on("disconnect", () => {
         const userId = socket.data.user?._id?.toString();
         if (userId) lastBidTime.delete(userId);

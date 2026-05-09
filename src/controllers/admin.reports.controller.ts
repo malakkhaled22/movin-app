@@ -68,7 +68,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
                     entityId: existingReport.targetId.toString(),
                     extra: {
                         reportId: reportId.toString(),
-                        status: "resolved"
+                        status: "resolved",
                     }
                 };
             }
