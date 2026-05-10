@@ -105,7 +105,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             }
 
             const bids = await Bid.find({ property: propertyId })
-                .sort({ createdAt: 1 })
+                .sort({ createdAt: -1 })
                 .limit(50)
                 .populate("user", "username");
 
@@ -123,7 +123,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
                 totalBids: property.auction.totalBids || 0,
                 endTime: property.auction.endTime,
                 status,
-                bidsHistory
+                bidsResponse:bidsHistory
             });
         } catch (error) {
             emitAuctionError(socket, "Server error");
