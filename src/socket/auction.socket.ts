@@ -106,7 +106,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
 
             const bids = await Bid.find({ property: propertyId })
                 .sort({ createdAt: -1 })
-                .limit(50)
+                .limit(10)
                 .populate("user", "username");
 
             if (property.auction.status === "approved" && property.auction.endTime) {
