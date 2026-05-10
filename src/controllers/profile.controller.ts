@@ -20,6 +20,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
             const successfulSales = properties.filter(p => p.status === "approved").length;
 
             return res.status(200).json({
+                userId: user.id.toString(),
                 user,
                 stats: {
                     propertiesListed,
@@ -35,6 +36,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
             const searchCount = user.searchHistory?.reduce((sum: number, s: any) => sum + (s.count || 0), 0) || 0;
 
             return res.status(200).json({
+                userId: user.id.toString(),
                 user,
                 stats: {
                     favoritesCount,
@@ -64,6 +66,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
             });
 
             return res.status(200).json({
+                userId: user.id.toString(),
                 user,
                 stats: {
                     totalUsers,
