@@ -114,7 +114,7 @@ export const setupAuctionSocket = (io: Server, socket: Socket) => {
             }
             const status = getAuctionStatus(property.auction.endTime);
 
-            const bidsHistory = bids.reverse().map(mapBidHistory);
+            const bidsHistory = bids.map(mapBidHistory);
 
             socket.emit("auctionData", {
                 property,

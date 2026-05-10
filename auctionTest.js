@@ -1,27 +1,30 @@
 const { io } = require("socket.io-client");
 
 const socket = io("http://localhost:3000", {
-    auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3NzgyMzQ1MTMsImV4cCI6MTc3ODIzNTQxM30.tjPBch2BRsWqbWeEskoHcf49G0HCEMisyfrdGb6eI9c"
-    }
+  transports: ["websocket"],
+  auth: {
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWZiZDRmMGE3ZTU5OWQxMWM4YWE3YTkiLCJpc0FkbWluIjpmYWxzZSwiaXNTZWxsZXIiOmZhbHNlLCJpc0J1eWVyIjp0cnVlLCJpYXQiOjE3Nzg0MzYzOTEsImV4cCI6MTc3ODQ0MzU5MX0.uniaclqp0O6LWXhXQo_-xjGLgO7EFEomnwH_nfxodr0"
+  }
 });
 
-const PROPERTY_ID = "69fd17889557999d2747a6f5";
-const USER_ID = "69f20223af1739d7064fa5cd";
+const PROPERTY_ID = "69ff8b6bcef19414168a5ecf";
 
 socket.on("connect", () => {
-    console.log("✅ Connected:", socket.id);
+  console.log("✅ Connected:", socket.id);
 
-    socket.emit("joinAuction", PROPERTY_ID);
+  socket.emit("joinAuction", PROPERTY_ID);
 
-    setTimeout(() => {
-        console.log("📌 Sending bid...");
-        socket.emit("placeBid", {
-            propertyId: PROPERTY_ID,
-            percent: 10,
-            userId: USER_ID
-        });
-    }, 3000);
+  setTimeout(() => {
+    console.log("📌 Sending bid...");
+    socket.emit("placeBid", {
+      propertyId: PROPERTY_ID,
+      percent: 10
+    });
+  }, 3000);
+});
+
+socket.on("connect_error", (err) => {
+  console.log("❌ connect_error:", err.message);
 });
 
 socket.on("auctionData", (data) => console.log("📦 auctionData:", data));
