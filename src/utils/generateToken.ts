@@ -5,7 +5,7 @@ interface Payload {
     isSeller?: boolean;
     isBuyer?: boolean;
     isAdmin?: boolean;
-}
+};
 
 export const generateToken = (payload: Payload) => {
     const accessSecret = process.env.JWT_SECRET;
@@ -17,7 +17,7 @@ export const generateToken = (payload: Payload) => {
         throw new Error("REFRESH_SECRET is not defined in environment variables");
     }
     const accessToken = jwt.sign(payload, accessSecret, {
-        expiresIn: "15min"
+        expiresIn: "2h"
     });
     const refreshToken = jwt.sign(payload, refreshSecret, {
         expiresIn: "10d"

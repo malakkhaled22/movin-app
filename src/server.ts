@@ -61,7 +61,7 @@ app.use("/api/notifications", notifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/recommend", recommendRoutes);
-app.use("/api/users", profileRoutes);
+app.use("/api/users/profile", profileRoutes);
 app.use("/api/properties",auctionRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/map", mappingRoutes);

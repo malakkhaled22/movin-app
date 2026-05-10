@@ -11,5 +11,7 @@ router.post("/resend-verify-email", resendVerifyEmailOtp);
 router.post("/login", loginUser);
 router.post("/refresh-token", refreshToken);
 
+
+
 router.post("/logout", verifyToken, logoutUser);
 export default router;

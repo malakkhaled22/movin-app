@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Property from "../models/property.model";
 import User from "../models/user.model";
 import Bid from "../models/bid.model";
+import bcrypt from "bcrypt";
 import { createNotificationForUser } from "../services/notifications.service";
 
 
@@ -113,5 +114,35 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Updated Profile Error: ", error);
         return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+    try {
+        const userId = (req.user as any)._id;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: "Old and new passwords are required" });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Old password is incorrect" });
+        }
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({ message: "New password cannot be the same as the old password" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+        res.status(200).json({ message: "Password changed successfully" });
+    }catch(error){
+        console.error("Error in changePassword: ", error);
+        res.status(500).json({ message: "Failed to change password", error });
     }
 };
