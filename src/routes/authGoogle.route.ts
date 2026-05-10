@@ -21,10 +21,10 @@ router.get(
         console.log("REFRESH: ", req.user.refreshToken);
         const accessToken = req.user.accessToken;
         const refreshToken = req.user.refreshToken;
+        const userId = req.user.user._id;
         return res.redirect(
-            `movin://auth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+            `movin://auth-success?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&userId=${userId}`
         );
     }
 );
-
 export default router;
