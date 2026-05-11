@@ -12,7 +12,7 @@ export interface IProperty extends Document {
         url: string;
         public_id: string;
     }[];
-    coordinates: {
+    coordinates?: {
         latitude: number;
         longitude: number;
     };
@@ -43,14 +43,11 @@ const propertySchema = new Schema<IProperty>(
         trim: true,
         },
         coordinates: {
-            latitude: {
-                type: Number,
-                required: true
-            },
-            longitude: {
-                type: Number,
-                required: true
-            }
+        type: {
+            latitude: { type: Number },
+            longitude: { type: Number }
+        },
+        required: false
         },
         price: { type: Number, required: true },
         listingType: {

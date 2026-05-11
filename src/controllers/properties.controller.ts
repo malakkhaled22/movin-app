@@ -51,9 +51,9 @@ export const createProperty = async (req: Request, res: Response) => {
       ? JSON.parse(req.body.coordinates)
       : req.body.coordinates;
 
-      if (!coordinates || coordinates.latitude === undefined || coordinates.longitude === undefined) {
+      if (coordinates && (coordinates.latitude === undefined || coordinates.longitude === undefined)) {
           return res.status(400).json({
-            message: "Coordinates are required"
+            message: "Coordinates are not valid. Latitude and Longitude are required.",
           });
       }
     const newProperty = await Property.create({
