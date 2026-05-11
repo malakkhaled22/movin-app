@@ -5,7 +5,6 @@ import Bid from "../models/bid.model";
 import bcrypt from "bcrypt";
 import { createNotificationForUser } from "../services/notifications.service";
 
-
 export const getUserProfile = async (req: Request, res: Response) => {
     try {
         const userId = (req.user as any)._id;
@@ -20,7 +19,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
             const successfulSales = properties.filter(p => p.status === "approved").length;
 
             return res.status(200).json({
-                userId: user.id.toString(),
                 user,
                 stats: {
                     propertiesListed,
@@ -36,7 +34,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
             const searchCount = user.searchHistory?.reduce((sum: number, s: any) => sum + (s.count || 0), 0) || 0;
 
             return res.status(200).json({
-                userId: user.id.toString(),
                 user,
                 stats: {
                     favoritesCount,
@@ -66,7 +63,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
             });
 
             return res.status(200).json({
-                userId: user.id.toString(),
                 user,
                 stats: {
                     totalUsers,
