@@ -115,6 +115,12 @@ export const getBuyerViewHistory = async (req: Request, res: Response) => {
             views: "$property.views",
             auction: "$property.auction",
             status: "$property.status",
+            title: "$property.title",
+            coordinates: "$property.coordinates",
+            bathrooms: "$property.bathrooms",
+            bedrooms: "$property.bedrooms",
+            size: "$property.size",
+            description: "$property.description",
             },
             seller: {
             _id: "$seller._id",

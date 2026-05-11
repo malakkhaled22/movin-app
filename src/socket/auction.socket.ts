@@ -313,6 +313,9 @@ export const endAuction = async (io: Server, propertyId: string) => {
                 }
             });
         }
+        
+        await Bid.deleteMany({ property: propertyId });
+
         io.to(propertyId.toString()).emit("auctionEnded", {
             winnerId: winnerId,
             amount,
