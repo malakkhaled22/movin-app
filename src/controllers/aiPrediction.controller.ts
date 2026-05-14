@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 export const predictPropertyPrice = async (req: Request, res: Response) => {
     try {
-        const response = await axios.post("https://web-production-bd24a.up.railway.app/predict", {
+        const response = await axios.post("https://web-production-ab7718.up.railway.app/predict", {
             Size_sqm: req.body.Size_sqm,     
             Bedroom_Num: req.body.Bedroom_Num,     
             bathrooms_numeric: req.body.bathrooms_numeric, 
