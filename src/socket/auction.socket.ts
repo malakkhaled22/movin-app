@@ -3,6 +3,7 @@ import Property from "../models/property.model";
 import Bid from "../models/bid.model";
 import { createNotificationForUser } from "../services/notifications.service";
 import { validateBidRules, buildBidUpdateCondition } from "../utils/auctionBidValidator";
+import mongoose from "mongoose";
 
 type PlaceBidData = {
     propertyId: string;
@@ -314,7 +315,7 @@ export const endAuction = async (io: Server, propertyId: string) => {
             });
         }
         
-        await Bid.deleteMany({ property: propertyId });
+        await Bid.deleteMany( { property: new mongoose.Types.ObjectId(propertyId) });
 
         io.to(propertyId.toString()).emit("auctionEnded", {
             winnerId: winnerId,
